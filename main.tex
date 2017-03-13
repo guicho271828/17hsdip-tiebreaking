@@ -53,3 +53,774 @@ BBB! \refig{fig:ip} \cite{Asai2016}
  \caption{This is Invasion Percolation}
  \label{fig:ip}
 \end{figure}
+
+\section{A New Framework:  \astar as a Series of Satisficing Search Episodes}
+
+So far, we have shown that by carefully analyzing search within an $f$-cost plateau,
+we were able to develop an effective
+{\it knowledge-free}, depth-based tie-breaking method which can significantly improve search performance on domains with 0-cost actions.
+We now propose a more general framework which underscores the importance of tie-breaking in \astar.
+\emph{Cost-optimal search
+can be seen as a series of satisficing searches on each plateau}. In this framework, the problem of tie-breaking can be
+reduced to a satisficing search.
+
+%% Reduced as a result of compression; also it sounds too trivial
+% First, for the ease of discussion, 
+% we say that a sorting strategy is an \emph{admissible sorting strategy}
+% when Best First Search using the strategy is guaranteed to return a cost-optimal solution.
+% Clearly, a sorting strategy for \astar is admissible if % and only if
+% % note: globally admissible heuristics are not admissible but returns optimal solutions
+% the first sorting criterion $f$ is admissible (since $f=g+h$, $h$ must also be an admissible heuristic).
+% However, the later sorting criteria used for tie-breaking are not necessarily admissible.
+
+While \astar requires the first sorting criterion $f$ to use an admissible heuristic in order to find an optimal solution,
+there are no requirements on the second or later sorting criterion.
+This means that the search within the same $f$ plateau can be an arbitrary  satisficing search\footnote{This refers to any algorithm which seeks a satisficing solution, as opposed to the ``satisficing'' track setting in IPC which also seeks to minimize the plan cost with anytime algorithms} without any cost minimization requirement. For example,
+if we ignore the first sorting criterion in the standard admissible strategy
+$[f,h,\fifo]$, we have $[h,\fifo]$, which is exactly
+the same configuration as a Greedy Best First Search (GBFS) using \fifo default tie-breaking. This 
+means that within a particular $f$-cost plateau, $[f,h,\fifo]$ is
+performing a satisficing GBFS.
+As another example, the reason for the poor performance of $[f,\fifo]$
+is clearly that it is running $[\fifo]$,
+an uninformed satisficing breadth-first search in the plateau.
+
+From this perspective, we can reinterpret \astar as in \refalgo{alg:astar-sat}: \astar expands the nodes in best-first order of $f$ value. When the
+heuristic function is admissible, the $f$ values of the nodes expanded by \astar never decreases during the
+search process.
+Thus, the entire process of \astar can be considered as a series of search episodes on each $\plateau{f}$.
+The search on each plateau terminates when the plateau is proven to contain no goal nodes (UNSAT), or when a goal is found (SAT).
+When the plateau is UNSAT, then the search continues to the plateau with the next smallest $f$ value.
+\refig{fig:astar-sat} also illustrates this framework.
+
+\begin{algorithm}
+ \begin{algorithmic}
+  \LOOP
+  \STATE Search $\plateau{f}$ for any goal state, using satisficing search algorithm
+  \IF{$\plateau{f}$ contains some goal (Plateau is SAT)}
+  \RETURN solution
+  \ELSE
+  \STATE Increase $f$ 
+  \ENDIF
+  \ENDLOOP
+ \end{algorithmic}
+ \caption{Reinterpretation of \astar as iterations of satisficing search on plateaus}
+ \label{alg:astar-sat}
+\end{algorithm}
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=0.8\linewidth]{img/astar/plateau-5.pdf}
+ \caption{The concept of \astar as a sequence of satisficing searches.}
+ \label{fig:astar-sat}
+\end{figure}
+
+%% Reduced as a result of compression
+% One may notice the difference between the satisficing search and the search on a plateau.
+% The former starts from a single initial node while the latter may start from multiple initial nodes.
+% For example, in satisficing planning, the search space contains a single start node which corresponds to an initial state.
+% % 
+% In contrast, when \astar starts expanding a new current $f$ value $f_{\mit{cur}}$ after expanding all nodes with $f<f_\mit{cur}$,
+% there may be multiple nodes with $f=f_\mit{cur}$ in the open list.
+% These nodes are generated as a result of expansions of the parent nodes with $f<f_\mit{cur}$.
+% % The search in this plateau terminates when the plateau is proven to contain no goal nodes (UNSAT), or some goal is found (SAT).
+% % When the plateau is UNSAT, then the search continues to the next plateau.
+% % 
+% However, the difference is superficial: The latter can be reduced to the former case by introducing a dummy node
+% which acts as a common parent of all initial nodes. We can thus reformulate the plateau search problem as a satisficing search from the single dummy node.
+
+This is somewhat similar to the standard approach to model-based planning 
+using SAT/IP/CP solvers \cite{kautz1992planning,van2005optiplan}, %avoid ''sequential'' here because it can refer to either the semantics (wrong) or to the solving strategy (correct)
+% \cite{rintanen2012planning,   Rintanen is state-of-the-art but not a good exemplar for this point, because his solver jumps around various horizons. van2005optiplan} in a slightly different sense.  
+based on an iterative strategy where a planning problem is converted to a corresponding constraint satisfaction problem with a finite horizon $t$ (plan length / makespan). The search starts from the horizon 0 and tests if the problem is satisfiable. If not, then it increases the horizon, add constraints excluding solutions below $t$, and retests the same problem with additional constraints for a new horizon $t+1$.
+
+% The strategy of iterative search over a sequence of horizons in model-based planning is somewhat analogous to our view of \astar as a sequence of satisficing search over a set of plateaus.
+
+%In forward heuristic search algorithms such as \astar, the concept of horizon corresponds to the $f$ value, which is a lower bound of the solution cost.
+
+% XXX it's not a correct/safe to say that model-based methods solves from scratch on each iteration. In a model-based planners, at iteration  t, a constraint is added to exclude solutions with <t steps/layers (depending on whether layers are sequential/parallel) so that only possible solutions for that horizon are tested, so on the t't hiteration no search effort is wasted searching for solutions <t. This is different from the way IDA* repeats all work on each iteration.
+
+%% A key difference in the \astar-based cost-optimal planning from the model-based planning is
+%% that the information is transmitted between different horizons:
+%% In \astar, nodes that are generated in the smaller
+%% $f$ layer will be ``sent'' to the larger $f$ layer through the global OPEN
+%% list, while current model-based methods prove the satisfiability of
+%% different horizons independently -- in each iteration of the search,
+%% they have to generate a new instance of a SAT/IP problem, and the
+%% underlying model-based solvers are forced to start the search from the scratch.
+
+%More precisely, each iteration of \astar only requires testing the satisfiability in the space of particular
+%$f$ while each iteration of model-based solvers tests the satisfiability in the space of all nodes $0\leq f(n)\leq t$ ($t$: a horizon).   
+
+
+%This latter behavior also connects model-based approaches to Iterative Deepening \astar
+%\cite{korf1985depth} where the search is restarted from the scratch on each iteration, forgetting the past search
+%effort in order to ensure the linear space usage.
+%\refig{fig:idastar-sat} illustrates the concept.
+% 
+%\todo*{A more standard interpretation of the connectin between SAT/IP/CSP planning vs \astar is that SAT/IP/CSP are
+%doing iterated deepening, where each iteration seeks a satisficing solution, like IDA*. }
+% 
+
+It is also reminiscent of the behavior of iterative deepening \astar \cite{korf1985depth}, which executes a series of satisficing searches with an $f$-cost limit which increases on each iteration. However, ``\astar-as a sequence of satisficing search'' differs from IDA* in that IDA*, in order to achieve linear memory usage, repeats previous work on each iteration. Instead of searching a particular plateau in each iteration, IDA* searches through the union of several plateaus.
+
+% Unsurprisingly, this can also be modeled as sequence of satisficing searches (\refalgo{alg:idastar-sat}).
+% 
+% \begin{algorithm}
+%  \begin{algorithmic}
+%   \LOOP
+%   \STATE Search $S=\bigcup_{0\leq f \leq F} \plateau{f}$ for any goal state
+%   \IF{$S$ contains some goal}
+%   \RETURN solution
+%   \ELSE
+%   \STATE Reset the internal state of the planner, increase $F$
+%   \ENDIF
+%   \ENDLOOP
+%  \end{algorithmic}
+%  \caption{IDA* as iterations of satisficing search on unions of plateaus}
+%  \label{alg:idastar-sat}
+% \end{algorithm}
+
+%% \begin{figure}[htbp]
+%%  \includegraphics{img/astar/plateau-6.pdf}
+%%  \caption{The concept of IDA* and model-based planning as a sequence of satisficing searches.}
+%%  \label{fig:idastar-sat}
+%% \end{figure}
+
+The framework of ``\astar as a series of satisficing searches'' suggests that we can directly apply satisficing search techniques to optimal search using \astar, especially for each $f$-cost plateau search.
+% 
+In the following two subsections, as well as in the next section, we show that this framework  (1) provides a better understanding of depth-diversification (\refsec{sec:depth-vs-types}), (2) allows us to prove the completeness of \astar on infinite graph depending on the tie-breaking methods (\refsec{sec:completeness-on-infinite-space}), and (3) allows us to improve the performance of \astar on Zerocost domains (\refsec{sec:distance-to-go}).
+
+\subsection{Depth Diversification as Satisficing Search}
+\label{sec:depth-vs-types}
+Within this framework, the implementation of depth diversification can be viewed as a variant of the Type-based diversification approach \cite{xie14type},  specifically tailored for Zerocost domains.
+
+\citeauthor{xie14type} proposed \emph{type based buckets}, an implementation of the OPEN list which partitions the nodes into buckets according to some set of key values (\emph{types}). They proposed several types such as $\brackets{1}$, $\brackets{g}$, $\brackets{h}$ or $\brackets{g,h}$. At each type-based expansion, a randomly selected node from a randomly selected single bucket is selected. For example, with type $\brackets{g,h}$, a node with $g=5$ and $h=3$ is put into a bucket  $\brackets{5,3}$. This mechanism diversifies the search so that it tries to expand the nodes with various distances from the initial state and various distances from a goal state.
+
+They then proposed Type-GBFS, which alternates the expansion between normal GBFS with a $[h,\fifo]$ sorting criteria and type-based expansion. This alternating framework addresses a weakness of GBFS: 
+GBFS is solely guided by the heuristic function $h$, and heuristic errors in $h$ can easily misguide GBFS to spend all of its time in the wrong part of the search space -- GBFS can become trapped due to heuristic error and cannot recover from the wrong decision until expanding all nodes in that branch.
+In the worst case, on infinite graphs, GBFS is not complete because it can be misdirected by the heuristic guidance forever \cite{Valenzano2016}.
+In contrast, in Type-GBFS, the alternation with type-based expansion introduces exploratory behavior of nodes with low $g$ and high $h$, offering the possibility of escaping from heuristic error traps.
+As a result, Type-GBFS is probabilistically complete on infinite graphs \cite{Valenzano2016}.
+
+Type-GBFS was primarily evaluated in the context of satisficing search with no consideration of plan quality, and performance is solely evaluated according to coverage.
+Thus, Xie et al adopted a unit-cost domain model: All action costs are ignored and replaced with unit costs in their experiments in order to boost coverage \cite{xie14type}. This is a commonly used technique for satisficing search which is also used in the first iteration of LAMA2011 \cite{richter2011lama}. 
+
+% (i.e., finding either a goal node or exhausting the plateau)
+
+In our framework of \astar as a sequence of satisficing searches, depth diversification after $h$ tie-breaking ($[f,h,\depth]$) can be viewed as the combination of (1) an implicit transformation of all 0-cost edges within a single $\plateau{f,h}$ to unit-cost edges, and (2) a pure type-based exploration within that plateau (unlike Type-GBFS, which alternates GBFS and type-based buckets).
+ 
+The notion of \emph{depth} counts the number of 0-cost actions, which does not change the $f$ value and $h$
+value, on the path from the entrance to the current plateau, to the current node.  Thus, 
+depth-diversification treats  the problem of finding an exit from a particular plateau as a unit-cost satisficing search problem
+-- the depth is analogous to a $g$-value which is calculated with unit costs and is restricted to a particular plateau.
+%% Also, depth diversification puts the nodes in a particular depth into the corresponding depth bucket, then
+%% diversifies the search among various depth buckets in a round-robin fashion (in this paper) or by a random
+%% selection (conference version of this paper \cite{Asai2016}). If the depth corresponds to the unit-cost $g$-value
+%% in each $\plateau{f,h}$, then the implementation-level mechanism for diversification is equivalent to
+%% $\brackets{g}$, a type bucket of a single key value $g$. Thus, depth
+%% diversification can be said to be using a type bucket of $\depth$ (modulo random/deterministic difference).
+
+Depth diversification for tie-breaking in admissible \astar has a different purpose and context from Type-GBFS for satisficing search,
+and differs as follows.
+First, depth diversification  is focused on finding a satisficing plan \emph{within a single plateau} and on solving \emph{domains with 0-cost actions}.
+% which is strictly harder than those without them. %worst-case complexity results for problem classes don't necessarily apply to specific instances, so using this ``strictly harder'' complexity result as justification is dangerous.
+Therefore, depth diversification is applied after the sorting by $h$.
+%Also, the role is limited to each plateau with the same $f$ and $h$ because nodes are put in the depth buckets only after being sorted by $f$ and $h$, 
+In contrast, type buckets are global --- type buckets have no preceding sorting criteria, and all open nodes are stored in these buckets. Type-GBFS then alternates type buckets and sorting by $h$, not applying them in a cascade manner.
+
+Nevertheless, the close relationship between depth diversification for admissible \astar and Type-GBFS for satisficing search is important. It shows that if we apply our framework of ``\astar as a series of satisficing searches'', we can directly use ideas which have been previously proposed for satisficing search within each $f$-cost plateau search.
+% In the next section, we present another instance of this general approach.
+
+\subsection{Completeness of \astar on an Infinite Graph}
+\label{sec:completeness-on-infinite-space}
+
+Similarly, we can use this framework for analyzing the completeness of \astar on infinite graphs with respect to various tie-breaking criteria.
+First, \astar is complete on finite graphs regardless of the tie-breaking strategy \cite{hart1968formal}.
+However, if the graph is infinite, the completeness of the algorithm depends on tie-breaking.
+We consider several cases depending on which plateau is infinite.
+ We only need to consider plateaus for $f \leq f^*$ because  \astar does not expand the nodes in $\plateau{f}$ for $f>f^*$.
+
+\begin{defi}
+ A graph is \emph{infinite} when the number of nodes in the graph has no upper bound.
+\end{defi}
+
+\begin{propo}
+ \label{propo:f-less}
+ If any $\plateau{f}$ for $f<f^*$ is infinite, then \astar does not terminate.
+\end{propo}
+
+\begin{proof}
+ \refalgo{alg:astar-sat} requires proving the UNSAT-isfiability (that there is no solution) of all non-final plateaus, $\plateau{f}$ ($\forall f<f^*$), so if any of them are infinite, \astar does not terminate.
+\end{proof}
+
+The remaining cases assume that the following two conditions hold: 
+ $\plateau{f}$ is finite  $\forall f<f^*$, and $\plateau{f^*}$ is infinite.
+Under this assumption,
+the completeness of \astar using tie-breaking $[f, \text{criterion}_2, \ldots \text{criterion}_k]$
+depends on the completeness of the satisficing search algorithm corresponding to 
+$[\text{criterion}_2, \ldots \text{criterion}_k]$ on $\plateau{f^*}$.
+For the standard tie-breaking criteria, we can apply previously known results.
+
+\begin{theo}[\citeauthor{Valenzano2016} \citeyear{Valenzano2016}]
+ % [Probabilistic Completeness of $\varepsilon$-greedy node selection \cite{valenzano2014comparison}]
+ $\varepsilon$-greedy node selection \cite{valenzano2014comparison} is \emph{probabilistically complete} on an infinite graph, i.e., 
+ the probability of finding a solution
+ % using $\varepsilon$-greedy node selection  \cite{valenzano2014comparison}
+ approaches to 1 when the number of expansion $t$ approaches $\infty$.
+\end{theo}
+
+\begin{corollary}
+ \astar with Random Order tiebreaking $[f,\ro]$ is probabilistically complete on an infinite graph
+ when $\plateau{f}$ is finite for all $f<f^*$. %stating the conditions is not much longer than referencing conditions
+ %satisfying the conditions in Proposition 2.
+\end{corollary}
+
+\begin{proof}
+  $[f,\ro]$ is an instance of \astar using $[\ro]$ as a satisficing algorithm for plateau-search. Since $[\ro]$ is a special case of $\varepsilon$-greedy node selection with $\varepsilon=1$,
+ $[\ro]$ is also probabilistically complete on an infinite $\plateau{f^*}$.
+\end{proof}
+
+Breadth-first search is complete when the graph has a finite branch factor below the solution depth.
+Since FIFO tiebreaking $[f,\fifo]$ applies breadth-first search to $\plateau{f^*}$,  it follows that
+
+\begin{propo}
+ \astar with FIFO tiebreaking $[f,\fifo]$ is complete on an infinite graph when
+ $\plateau{f}$ is finite  $\forall f<f^*$ and
+ the maximum outdegree of the nodes is finite in $\plateau{f^*}$ below the solution depth.
+\end{propo}
+
+LIFO tie-breaking behaves equivalently to  a depth-first search with duplicate detection (DFS-dup) on $\plateau{f^*}$.
+Assuming a fixed successor ordering, we get the following:
+
+% \begin{proof}
+%  % on an infinite graph is complete when (2) and (3) holds.
+% % Since the solution have finite length and thus finite depth in the plateau, the search space expanded by FIFO (Breadth-first search) in infinite $\plateau{f^*}$ is finite.  Thus FIFO returns the solution in a finite time. 
+% \end{proof}
+
+\begin{propo} %corollary? (because dfs completeness is known under these conditions)
+ \astar with LIFO tiebreaking $[f,\lifo]$ is complete on an infinite graph iff
+ $\plateau{f}$ is finite for all $f\leq f^*$.
+\end{propo}
+
+%% \begin{proof}
+%%  Completeness depends on the completeness of depth-first search on an infinite graph.
+%%  On a graph satisfying (2), it has a possibility to search the infinitely large region.
+%%  On a graph with (4) a finite maximum depth,
+%%  it still has a possibility to search the infinitely large region in a subtree
+%%  which does not contain the solution.
+%%  If we assume both (2) and (4), then the graph becomes finite.
+%% \end{proof}
+\begin{proof}
+ If $\plateau{f^*}$ is infinite, then
+ either the maximum depth or the maximum outdegree of the nodes is infinite (has no upper bound).
+ If the maximum depth has no upper bound,
+ DFS-dup requires an arbitrary longer runtime before the first backtracking
+ unless the solution is found before it.
+ If the maximum outdegree has no upper bound,
+ there is a successor ordering which forces DFS-dup
+ to search all subtrees that do not contain solutions, and
+ the size of the subtrees has no upper bound.
+ If both the maximum depth and the maximum outdegree are finite, then $\plateau{f^*}$ is finite
+ and DFS-dup is complete.
+ Combined with \refpropo{propo:f-less},
+ LIFO tie-breaking requires a finite $\plateau{f}$ for all $f\leq f^*$.
+\end{proof}
+
+Finally, we show the completeness of our iteration-based depth diversification in \refalgo{alg:depth}.
+
+\begin{theo}
+ \astar with Depth Diversification $[f,\depth,*]$ is complete % on an infinite graph % not necessary, as the following clause fully constrains the cases for which DD is complete
+when  $\plateau{f}$ is finite  $\forall f<f^*$ and
+ the maximum outdegree of the nodes is finite in $\plateau{f^*}$ for depths below the solution depth.
+\end{theo}
+ 
+\begin{proof}
+ Any solution must have a finite depth $d^*$ on $\plateau{f^*}$.
+ On every iteration of the $pop$ method of \refalgo{alg:depth} from the largest depth $D$ to the depth 0, each depth is expanded once.
+ Since the maximum outdegree is finite,
+ every node with depth $d\leq d^*$ will be expanded in a finite number of iterations.
+\end{proof}
+
+
+
+\section{Tie-Breaking Using Distance-to-Go Estimates}
+
+\label{sec:distance-to-go}
+In the previous section, we proposed a framework which views cost-optimal \astar search as a series of satisficing searches on each $f$-cost plateau, and argued that 
+the problem of tie-breaking can be reduced to a satisficing search.
+We showed that the depth diversification tie-breaking criterion, which is highly effective on Zerocost domains, is in fact a case where a previously studied technique for satisficing search (type-based exploration) turns out to be highly effective when applied to tie-breaking.
+In this section, we push this insight further and propose another approach to improving the
+search performance in plateaus produced by Zerocost domains --
+using inadmissible \emph{distance-to-go} estimates (heuristics) as a tie-breaking criterion within an admissible \astar search.
+
+% ; This allows the heuristics to be
+% inadmissible when it is only used for tie-breaking strategy.
+
+% The obvious
+% drawback of this strategy is the cost of additional heuristic
+% computation.
+
+% We next compare our depth diversification to the distance-to-go
+% estimates in the plateau.  
+Distance-to-go estimates are a class of
+heuristics which treat all actions as if they have unit cost. Even 
+when 0-cost actions are present, these estimates can predict the
+number of operations required to reach a goal.
+In general, the estimates are inadmissible (unless the estimates are guaranteed to underestimate the number of required actions and all actions in the original domain have unit cost).
+Previous work on distance-to-go-heuristics has focused on 
+their use for satisficing planning.
+
+
+% Except for cases where the target domains are unit-cost by origin (e.g. puzzle domains), in which case \astar is already using unit cost estimates without any modification anyways,
+$A^*_\epsilon$ \cite{pearl1982studies} is one of
+the earliest algorithms that combines distance-to-go estimates with the cost estimates. It is a bounded-suboptimal
+search which expands nodes from the \emph{focal} list, the set of nodes with $f(n)\leq w\cdot f_{\mit{min}}$ where weight $w$ serves as a suboptimality bound, similar to weighted \astar, 
+ and $f_{\mit{min}}$ is the minimum $f$ value in the OPEN list.  While $f$
+is based on an admissible heuristic function, the nodes in the focal list are expanded in increasing order of
+an inadmissible distance-to-go estimate $\hh$. Since the search does not follow the best-first order according to $f$, it is 
+not admissible, and is instead $w$-admissible. One exception is the case of $w=1$ where the focal list is equivalent
+to the $f$ plateau and the expansion order in the focal list corresponds to the tie-breaking on plateaus. In our
+notation, this algorithm can be written\footnote{
+However, an actual implementation may differ due to dynamic updates to $f_{\mit{min}}$.}
+as a BFS with the following sorting criteria:
+\[
+ [ \lceil \frac{f}{w\cdot f_{\mit{min}}} \rceil, \hh, *]
+\]
+This notation is derived from the fact that the focal list ``blur''s $f$ up to $w\cdot f_{\mit{min}}$.
+For example, when $w=2, f_{\mit{min}}=5$ and
+$f(n)=5,9,11$, then $\lceil \frac{f}{w\cdot f_{\mit{min}}} \rceil=1,1,2$ respectively. 
+
+Continuing this line of work, \shortciteauthor{thayer2009using} \citeyear{thayer2009using,thayer2011bounded}
+evaluated various distance-to-go configurations of Weighted
+\astar, Dynamically Weighted \astar \cite{pohl1973avoidance} and $A^*_\epsilon$, where
+some configurations use distance-to-go as part of
+tie-breaking. This work focused on bounded-suboptimal search rather than cost-optimal search.
+% 
+\shortciteauthor{cushing2010cost} \citeyear{cushing2010cost} pointed out the danger of relying  % neutral tone
+on cost estimates in a satisficing search by investigating ``$\varepsilon$-cost traps'' and other pitfalls caused by
+cost estimators for search guidance. % Again, this work targets satisficing search. %''satisficing search'' appears in previous sentence.
+% 
+Finally, % a \sota satisficing planner 
+the FD/LAMA2011 satisficing planner incorporates distance-to-go estimates in its iterated search
+framework \cite{richter2011lama}. The first iteration of LAMA uses distance-to-go estimates combined with various satisficing
+search enhancements.
+
+\shortciteauthor{benton2010g} \citeyear{benton2010g} proposed an inadmissible technique for temporal planning where short actions are
+hidden behind long actions and do not increase makespan . Such actions cause  ``g-value
+plateaus'', which are similar to the large plateaus caused by 0-cost actions in sequential planning.  They implemented an inadmissible
+heuristic function combined with distance-to-go estimates as an extension of Temporal Fast Downward 
+\cite{eyerich2009using}.  % As stated, their method is not applicable to the cost-optimal search.%true, but they might claim that adapting their technique to admissible search is ``trivial'', so let's just leave this out.
+
+%% I couldnt find this in the paper now... 
+%  and showing that (non-admissibly) treating all actions as unit cost sometimes finds an optimal plan quickly.
+% Although it could find an optimal plan by chance, this does not guarantee the optimality of the solution.
+
+\subsection{Embedding Distance-to-Go Estimates in Admissible Search}
+
+Although previous work on distance-to-go estimates assume a satisficing context,
+we show that distance-to-go estimates can be useful for cost-optimal search.
+Since the admissibility of the sorting strategy and the optimality of the solution are not affected by the
+second or later levels of sorting criteria, it is possible to use an inadmissible distance-to-go estimate
+in these subsequent sorting criteria without sacrificing the optimality of the solution found.
+This means inadmissible heuristics can be used for tie-breaking.
+
+
+Let $h$ be an admissible heuristic function, and
+$\hat{h}$ be a distance-to-go variation of $h$, i.e., $\hat{h}$ uses essentially the same algorithm as $h$, except that while $h$ uses the actual action costs for the problem domain, $\hat{h}$ replaces all action costs with 1.
+Since $h$ is admissible, multi-heuristic sorting strategies such as $[g+h,h,\hat{h}]$ or $[g+h,\hat{h}]$
+are admissible.
+
+Moreover, we can even use a multi-heuristic strategy which uses an inadmissible heuristic for tie-breaking which is unrelated to the primary, admissible heuristic $h$.
+ For example, $[g+h^{\lmcut},\ffo]$ is an admissible sorting strategy
+because the first sorting criterion $f=g+h^{\lmcut}$ uses an admissible
+\lmcut heuristic. Its second sorting criterion, the distance-to-go FF
+heuristic \cite{Hoffmann01}, does not affect the admissibility of this entire sorting strategy.
+
+A potential problem with sorting strategies which use multiple heuristics is the cost of computing additional
+heuristic estimates. For example, $[g+h^{\lmcut},\ffo]$ requires more time to evaluate each node compared to a standard tie-breaking strategy such as $[g+h^{\lmcut},h^{\lmcut}]$ because computing the $\ffo$ heuristic incurs significant overhead per node while the results of $h^{\lmcut}$ can be reused by a caching mechanism.
+When the inadmissible heuristic for tie-breaking is $\hat{h}$, i.e. a distance-to-go (unit cost) variant of the primary, admissible heuristic $h$, it may be possible to reduce this overhead to some extent by implementing $h$ and $\hat{h}$ so that they share some of the computation  -- this is a direction for future work.
+
+\subsubsection{Combining Distance-to-Go Estimates with Default Tie-Breaking and Depth Diversification} % added subsection to highlight the new combination of depth + d2go
+
+Tie-breaking using distance-to-go estimates can still leave a set of nodes which are equivalent up to the distance-to-go criterion (multiple nodes can have the same $f$, $h$, and $\hh$ values), so additional level(s) of tie-breaking are necessary in order to select a single node. By adding a standard default criterion such as \fifo, \lifo, \ro, we obtain a sorting strategy that imposes a total order. For example, 
+$[f^{\lmcut},\ffo,\fifo]$
+ applies \fifo after the distance-to-go estimate $\ffo$.
+
+Furthermore, it is possible to combine depth diversity based tie-breaking with distance-to-go estimates by applying the depth-diversity criterion after the distance-to-go estimate. For example, 
+$[f^{\lmcut},\ffo,\depth,\fifo]$ applies depth diversification criterion after the $\ffo$ distance-to-go estimate.
+As we shall see below, a sorting strategy which performs tie-breaking using both distance-to-go estimates and depth diversity results in the best performance overall.
+
+
+
+\subsection{Evaluation of Distance-to-Go Estimates as Tie-Breaking Criteria for Admissible Search}
+
+We tested various admissible sorting strategies on IPC domains and Zerocost domains.
+% on Zerocost domains  where tie-breaking strategies have the large impact.
+The configurations are listed in \reftbl{list:distance-configs}. 
+In all configurations, the first sorting criterion is the $f=g+h$ value
+where $h$ is an admissible heuristic (either \lmcut or \mands) using the actual action-cost based  cost calculation.
+As the second (and third) criteria,
+we used $\hat{h}$, the distance-to-go version tested  of the original heuristic function $h$, as well as a distance-to-go variation of FF
+heuristic ($\hat{h}^{\ff}$).
+% , and a distance-to-go variation of
+% GoalCount heuristic ($\hat{h}^{\text{GoalCount}}$) which is added to
+% represent an uninformative but fast inadmissible heuristic function with
+% least additional overhead.
+We also added configurations with the depth metric within
+$\plateau{f,\hat{h}^{\text{\ff}}}$.
+A summary of the results is shown in \reftbl{tbl:dtg-summary}.
+Detailed per-domain results are shown in \reftbls{tbl:dtg-lmcut-zero}{tbl:dtg-mands-ipc}.
+
+\begin{table}[htbp]
+ \centering
+ \[
+ \begin{array}{lcllcllcl}
+  (1)\, [h+g, & h,                      &*] & % \\\relax
+  (2)\, [h+g, & h,     \quad   \hat{h}, &*] & % \\\relax
+  (3)\, [h+g, & \hat{h},                &*]     \\\relax
+  (4)\, [h+g, & \hat{h}^{\ff},          &*] & % \\\relax
+  % not include it unless the reviewer complained. 
+  % (5)\, [h+g, & \hat{h}^{\text{GoalCount}},  &*]     \\\relax
+  (5)\, [h+g,   & h, \depth,                   &*] & % \\\relax
+  (6)\, [h+g,   & \hat{h}^{\text{FF}}, \depth, &*]     \\\relax
+ \end{array}
+ \]
+ \vspace{-3em}
+ \caption{Configurations compared in this section. $h$ is either \lmcut or \mands.}
+ \label{list:distance-configs}
+\end{table}
+
+\begin{table}[htbp]
+ \centering
+ \input{tables/8-1-summary}
+ \caption{
+ Summary Results: Coverage comparison (the number
+ of instances solved in 5min, 4GB) between several sorting strategies.
+ For comparison, we also include the results of configurations evaluated in the previous sections.
+ }
+ \label{tbl:dtg-summary}
+\end{table}
+
+\subsubsection{Evaluation on Zerocost Domains}
+
+In Zerocost domains, we see that $\hat{h}$ tie-breaking outperforms $h$ tie-breaking for both \lmcut (e.g. $256\rightarrow 295$ with \fifo) and \mands (e.g. $280\rightarrow 308$ with \fifo).
+Also, combining $h$ and $\hat{h}$ can further improve performance when the heuristic is \lmcut (e.g. $295\rightarrow 305$ with \fifo).
+The results of combining $h$ and $\hh$ were comparable to $\hh$ when the main heuristic function $h$ is \mands.
+% 
+Yet more surprisingly, using $\ffo$ further improved the performance for both \lmcut
+(e.g. $[f,h,\hh,\fifo]:305 \rightarrow [f,\ffo,\fifo]:337$) and \mands 
+(e.g. $[f,h,\hh,\fifo]:307 \rightarrow [f,\ffo,\fifo]:336$).
+% 
+Thus, when the depth diversity criterion  is not used, the best configurations are those
+which use $\ffo$.
+
+% let's avoid using \sota to describe relatively ``old'' heuristics like ff (where ``relatively old'': 10yrs).
+The reason for the good performance of $[f^{\lmcut},\ffo,*]$ is not surprising:
+$\ffo$ is by itself known to be a powerful inadmissible heuristic
+function for satisficing GBFS, and 
+if we ignore the first sorting criterion, $[f^{\lmcut},\ffo,*]$ is a GBFS with $[\ffo,*]$.
+
+\begin{comment}
+ In detail, following domains are improved by each change:
+ \begin{itemize}
+ \item \textbf{$h^\lmcut \to \hh^\lmcut$}: \pddl{elevator-up} (all), \pddl{freecell-move} (\fifo,\ro), \pddl{mprime-succumb} (all), \pddl{mystery-feast} (\lifo,\ro) \pddl{parking-movecc} (all), \pddl{pipesworld-pushend} (all), \pddl{scanalyzer-analyze} (\lifo,\ro), \pddl{wood\-working-cut} (all). (Compare \reftbl{tbl:lmcut-zerocost-full} and \reftbl{tbl:dtg-lmcut-zero}.)
+ \item \textbf{$h^\mands \to \hh^\mands$}: elevator-up (all), \pddl{freecell-move} (\fifo,\ro), \pddl{mprime-succumb} (\ro), \pddl{mystery-feast} (\fifo,\lifo) \pddl{parking-movecc} (all), \pddl{pipesworld-pushend} (all), \pddl{scanalyzer-analyze} (all), wood\-working-cut (all), \pddl{zenotravel-fuel} (\lifo,\ro). (Compare \reftbl{tbl:mands-zerocost-full} and \reftbl{tbl:dtg-mands-zero}.)
+ \item \textbf{$\hh^\lmcut \to h^\lmcut,\hh^\lmcut$}: \pddl{airport-fuel} (\fifo,\ro), \pddl{mprime-succumb} (\fifo,\ro), \pddl{parking-movecc} (\lifo), \pddl{pipesworld-pushend} (\fifo), \pddl{scanalyzer-analyze} (all). (See \reftbl{tbl:dtg-lmcut-zero}.)
+ \item \textbf{$\hh^\mands \to h^\mands,\hh^\mands$}: comparable. (See \reftbl{tbl:dtg-mands-zero}.)
+ \item \textbf{$h^\lmcut,\hh^\lmcut \to \ffo$}: \pddl{blocks-stack} (all), \pddl{freecell-move} (all), \pddl{hiking-fuel} (all), \pddl{miconic-up} (all), \pddl{mprime-succumb} (all), \pddl{parking-movecc} (all), \pddl{pipesworld-pushend} (all), \pddl{sokoban-pushgoal} (all), \pddl{tidybot-motion} (all), \pddl{tpp-fuel} (\ro). (See \reftbl{tbl:dtg-lmcut-zero}.)
+ \item \textbf{$h^\mands,\hh^\mands \to \ffo$}: \pddl{airport-fuel} (all), elevator-up (all), \pddl{freecell-move} (all), \pddl{miconic-up} (all), \pddl{mprime-succumb} (all), \pddl{parking-movecc} (all), \pddl{pipesnt-pushstart} (all), \pddl{scanalyzer-analyze} (all), \pddl{sokoban-pushgoal} (all), \pddl{tpp-fuel} (\ro). (See \reftbl{tbl:dtg-mands-zero}.)
+ \end{itemize}
+\end{comment} 
+
+Adding the depth diversity criterion further improves the performance of the $\ffo$-based strategies,
+ although the impact was small.
+The coverage increased in both
+ $h=h^\lmcut$ (\fifo: $337\rightarrow 340$, \lifo: $340\rightarrow 342$, \ro: $341\rightarrow 344.3$) and
+ $h=h^\mands$ (\fifo: $336\rightarrow 337$, \lifo: $331\rightarrow 333$).
+ % 
+\begin{comment}
+ Improvement was observed in the following domains:
+\begin{itemize}
+ \item \textbf{\lmcut}: \pddl{mprime-succumb} (\lifo, \ro), \pddl{storage-lift} (\ro), \pddl{tidybot-motion} (\fifo), \pddl{tpp-fuel} (\fifo, \ro). (See \reftbl{tbl:dtg-lmcut-zero}.)
+ \item \textbf{\mands}: \pddl{mprime-succumb} (\lifo, \ro), \pddl{tpp-fuel} (\fifo). (See \reftbl{tbl:dtg-mands-zero}.)
+\end{itemize}
+\end{comment}
+% 
+When the default tie-breaking was \ro and the heuristic is \mands, $[f,\ffo,\depth,\ro]$ performed slightly worse than 
+$[f,\ffo,\ro]$, but the difference was very small  ($337.9\rightarrow 337.6$) and $\depth$ made the performance slightly more robust (smaller standard deviation: $2.1\rightarrow 1.3$).
+
+\subsubsection{Evaluation on Standard IPC Domains}
+
+For the standard IPC benchmark instances, the overhead due to the additional computation of
+$\hat{h}$ or $\ffo$ tends to harm the overall performance.
+% The only domains consistently enhanced by distance-to-go estimates are \pddl{mprime} using \lmcut,
+% \pddl{parcprinter-opt11} using \mands and \pddl{woodworking-opt11} using \mands. Moreover, their improvements are small.
+Therefore, the best configuration using \lmcut was
+$[f,h,\depth,\lifo]$ which uses depth and does not impose the cost of
+additional heuristics, and the best result using \mands
+was $[f,h,\lifo]$ which imposes no overhead including the depth.
+
+If we look further into the detail, we observed the following:
+In \pddl{Cybersec}, distance-to-go variants (e.g. $[f^\lmcut,\ffo,\lifo]$:5) improve upon the standard strategy (e.g. $[f^\lmcut,h^\lmcut,\lifo]$:3), but does not improve upon depth (e.g. $[f,h,\depth,\lifo]$: 12). When $h=h^\mands$, all coverages are zero. Overheads by $\ffo$ also slightly degrade the performance in \pddl{Openstacks} (e.g. $[f^\lmcut,h^\lmcut,\lifo]$:18, $[f^\lmcut,\ffo,\lifo]$:17, $[f^\lmcut,h^\lmcut,\depth,\lifo]$: 18; Also, $[f^\mands,h^\mands,\lifo]$:19, $[f^\mands,\ffo,\lifo]$:18, $[f^\mands,h^\mands,\depth,\lifo]$: 19). Thus, in these two domains, although there are some improvements in search efficiency due to the guidance by $\ffo$ or $\hh$, the runtime overhead of computing the  distance-to-go heuristics outweighed the benefit.
+ 
+In the domains with only positive cost actions (all IPC domains except \pddl{Openstacks} and \pddl{Cybersec}), $\hat{h}$ or $\ffo$
+only harm the overall performance due to the overhead.
+When the primary heuristics is \lmcut, we do not observe a significant difference between single-heuristics strategies except for the fractional difference in the configurations using \ro.
+When the primary heuristic is  \mands, $[f^\mands,h^\mands,\lifo]$ performs slightly better than  other default tie-breaking strategies; It also outperforms the depth-based variants as we already discussed in \refsec{sec:depth-based-evaluation}.
+%  (\reftbl{tbl:dtg-lmcut-ipc} and \reftbl{tbl:dtg-mands-ipc}).
+
+\subsubsection{Summary of the Evaluation}
+% \pagebreak[3]
+
+\reftbl{tbl:summary} summarizes the overall conclusions of our performance evaluations. We conclude that although the performance gain by depth diversification and distance-to-go heuristics depend on the domain characteristics, they provide a promising overall performance enhancement.
+
+\begin{table}[htb]
+\centering
+\begin{tabular}{|p{5em}|p{8em}||p{10em}|p{10em}|}
+\hline
+ Primary Heuristics & Zerocost domains
+                    & Zerocost IPC domains (\pddl{Cybersec}, \pddl{Openstacks})
+                    & Positive-cost IPC domains \\
+\hline
+\lmcut & $[f,\ffo,\depth,\ro]$
+       & $[f,h,\depth,\lifo]$
+       & $[f,h, *]$ or $[f,h, \depth, *]$ (any \textit{default} tie-breaking) \\[0.1em]
+\hline
+\mands & $[f,\ffo,\ro]$ or $[f,\ffo,\depth,\ro]$, but the latter has a smaller variance. 
+       & $[f,h,\lifo]$ or $[f,h,\depth,*]$ (any \textit{default} tie-breaking)
+       & $[f,h,\lifo]$ \\
+\hline
+\end{tabular}
+\caption{Summary of the performance evaluation: Best tie-breaking strategy for each group of domains and each primary heuristic function.}
+\label{tbl:summary}
+\end{table}
+
+\subsection{Simple Dynamic Configuration for Overall Performance}
+\label{sec:dynamic-configuration}
+
+In practice, the performance degradation when using multi-heuristic strategy in domains with only positive cost actions does not pose a problem.
+We can easily avoid the overhead incurred by the distance-to-go heuristics in those domains by applying the following simple policy:
+If there are any 0-cost actions, use a multi-heuristic strategy; Otherwise, use a single-heuristic strategy.
+
+Since the impact of such a check on the total runtime is negligible, we can extrapolate the result of applying this rule based on the previously obtained results.
+Coverage results in \reftbl{tbl:dtg-summary-sum} show the total coverage of
+Zerocost and IPC benchmark domains. The bottom two rows, labeled as \emph{dynamic configuration},
+are the extrapolated results when the switching policy is applied -- this dynamic configuration achieves the highest overall coverage.
+
+\begin{table}[htb]
+ \centering
+ \input{tables/8-1-summary-sum}
+ \caption{
+ % 
+ Summary Results: Coverage comparison, the total of IPC domains and Zerocost domains (the number of instances
+ solved in 5min, 4GB) between several sorting strategies, plus a dynamic configuration strategy.  $[f,h,\fifo],
+ [f,h,\ro], [f,\hh,*], [f,h, \hh,*], [f,\ffo,*]$ are not shown because they achieve smaller coverage.
+ % 
+ }
+ \label{tbl:dtg-summary-sum}
+\end{table}
+
+When the configuration rule is applied to standard IPC instances, the domains with 0-cost actions are \pddl{Cybersec} and \pddl{Openstacks} only. They are solved using a multi-heuristic strategy while other domains are solved in the best performing single-heuristic strategy. In Zerocost instances, all domains are solved using the multi-heuristic strategy.
+\todo*{Maybe we should show dynamic configuration results in the detailed per-domain tables, just so that it's obvious that we can get ``dominant'', state-of-the-art  behavior --- results are simulated, not actually implemented. Thus the total results should be fine. However, I added exactly which domains were 0-cost.}
+
+% While these multi-heuristic strategies did not improve the perfomance in
+% the positive cost domains because the final plateaus are small, a simple
+% method which 
+
+
+Overall, these results also strengthen our claim that one should not necessarily rely upon $h$-based
+tie-breaking in some
+domains, as already discussed in \refsec{sec:noh}. In Zerocost domains,
+using a distance-to-go version of an inadmissible heuristic function for
+tie-breaking is more effective. Also, combining the depth metric with
+such an inadmissible heuristics is also effective.
+
+We only tested this relatively simple dynamic configuration that switches between two strategies based on the presence of 0-cost operators. However, as noted in \refsec{sec:depth-based-evaluation}, domain-specific solvers (as opposed to domain-independent solvers, which are the main focus of this paper) can benefit from fine-tuning the tiebreaking strategy so that it is most suited to the target domain.
+
+\section{Related Work}
+
+Previous work on escaping search space plateaus has focused on
+non-admissible search.  DBFS \cite{imai2011novel} % is a technique which
+adds stochastic backtracking to Greedy Best First Search (GBFS) to avoid
+being misdirected by the heuristic function. Type based buckets
+\cite{xie14type} classify plateaus in GBFS according to the
+$[g,h]$ pair and distributes the effort.\footnote{The relationship between Type-GBFS and our work is discussed in detail in \refsec{sec:depth-vs-types}.}  Marvin \cite{Coles07} learns plateau-escaping macros
+from the Enhanced Hill Climbing phase of the FF planner
+\cite{Hoffmann01}. % (note that use of macros makes the search inadmissible in general). % adding macros to optimal planners doesn't make search inadmissible as long as the original edges in the search graph remain.
+\citeauthor{Hoffmann05}  gives a detailed analysis of the
+structure of the search spaces of satisficing planning \citeyear{Hoffmann05,Hoffmann11}.
+
+% % duplicated, and not particularly investigating plateau %restoring in response to R3.2
+ \citeauthor{benton2010g} \citeyear{benton2010g} proposes inadmissible technique for temporal planning
+ where short actions are hidden behind long actions and do not increase makespan.
+ \citeauthor{wilt2011cost} \citeyear{wilt2011cost} also analyzes inadmissible distance-to-go estimates.
+% 
+To our knowledge, plateaus have not been previously investigated for cost-optimal search.
+Admissible and inadmissible search differ significantly in how non-final plateaus (plateaus with $f < f^*$) are treated:
+Inadmissible search can skip or escape plateaus whenever possible, while
+admissible search cannot, unless it is the plateau with $f=f^*$ where the goals can immediately be found.
+
+Some real-time search algorithms like $ARA^*$ \cite{likhachev2008anytime} are able to prune some states in the final plateau using the knowledge acquired in the previous iterations of suboptimal searches. $ARA^*$ uses a sequence of $W\hspace{-0.2em}A^*$ ($[g+wh]$) with decreasing weights $w$, with the final round of iterations being optimal \astar with an uninflated heuristic value (i.e. $w=1$). When $f=g+wh$ reaches the cost of best path found so far by the previous suboptimal iterations, it can safely terminate the search maintaining the current bounded optimality guarantee $w$, that is, $w=1$ in the final iteration. Thus, in an iterated, real-time search setting, this could largely avoid the problem of searching the final plateau if the previous suboptimal searches \emph{happen} to have found the optimal solution already. 
+
+In their work on combining multiple inadmissible heuristics in a planner,
+\citeauthor{RogerH10} \citeyear{RogerH10} considered a tie-breaking approach which works as follows:
+When combining two heuristics $h_1$ and $h_2$, $h_1$ is used as the primary criterion,
+and $h_2$ is used to break ties among nodes with the same $h_1$ --- $[h_1,h_2,\fifo]$.
+This did not perform well in their work on satisficing planning compared to the approaches based on alternation queues and Pareto-optimal queue selection.
+% 
+Since their focus is on how to combine multiple heuristics,
+this tie-breaking-based approach is just one instance of various implementations of OPEN lists.
+In contrast, this paper provides a focused, in-depth investigation of various tie-breaking strategies,
+and shows 
+how tie-breaking enables the efficient search on the plateau created by the earlier levels of sorting criteria.
+
+%% already mentioned in the earlier section.
+% The PLUSONE %\footnote{This term is used on the Fast Downward website.} XXfootnote takes too much space
+% cost-type (or distance-to-go) is a non-admissible search technique in the Fast Downward/LAMA planner
+% \cite{richter2010lama} which increases all action costs by 1.
+% % By eliminating 0-cost actions, this behaves similar to our $[f,h,\fd,\ro]$ tie-breaking.
+% %Using PLUSONE, three successive
+% %applications of 0-cost operators have cost 3, and two
+% %applications have cost 2, and smaller cost is preferred, just as
+% %\astar always expands the node with smaller $f$-value.
+% This technique explicitly targeted 0-cost actions,
+% and resulted in significantly better performance in the IPC-6
+% satisficing track \cite[p. 137, Sec. 3.3.2]{richter2010lama}.
+% %\todo*{citation}
+% % There's a long discussion of Openstacks in \cite{richter2010lama}, p. 167-169, but I can't find PLUSONE anywhere. Maybe it's called something else in the paper?  Maybe \richter2010lama is the wrong citation??
+% PLUSONE cost type makes a heuristic function inadmissible, and since LAMA uses it as the first sorting criterion, it makes the sorting criteria of LAMA inadmissible.
+
+% It's not clear what these techniques have in common, except that they are all orthogonal to heuristics,
+% If that's the case, then there's no need to cite them in this paper -- there's no reason why these particular techniques
+% are more relevant to this paper than hundreds of other techniques that are orthogonal to heuristics.
+%% In admissible planning,
+%% \emph{Symmetry Breaking}
+%% \cite{Fox1998,pochter2011exploiting,domshlak2013symmetry} is the search
+%% technique that tries to prune the states with symmetric
+%% paths. \emph{Partial Order Reduction}
+%% % , \emph{Strong Stubborn Sets} and \emph{Expansion Core} are
+%% is also a technique which prunes the
+%% intermediate states that reach to the same goal using the different
+%% orders of same actions. \emph{Dominance Pruning} \cite{hall2013faster} is a
+%% technique which prunes a state if it can be proven to be worse than the other nodes.
+%% % 
+%% These are usually not considered an attempt to improve the heuristic
+%% estimates, however, in terms of \emph{Path-dependent globally admissible
+%% heuristics} \cite{karpas2012optimal}, a class of heuristics which is
+%% admissible only on a particular optimal path, generalizes the above
+%% techniques as assigning an infinite cost to some nodes on the other optimal paths.
+%% % 
+%% % From a slightly different category, Pathmax \cite{mero1984heuristic} and
+%% % Bidirectional Pathmax \cite{felner2011inconsistent} are the techniques
+%% % which converts an inconsistent heuristics into non-decreasing,
+%% % consistent heuristics.
+%% Thus, in a broad term, all of these methods are the
+%% attempts to improve the heuristic estimates.
+%% % Although in some particular
+%% % case they may be able to return a perfect heuristics, they are still not
+%% % always a perfect heuristics, implying that the plateau is unavoidable.
+%% In contrast, our tie-breaking techniques aims specifically at the case
+%% where the plateau is encountered and the planners are forced to run a
+%% knowledge-free search.
+
+\emph{\astar with lookahead} ($AL^*$) \cite{stern2010look} extends \astar by performing a cost-bounded depth-first \emph{lookahead} from each node as it is generated. Upon the normal expansion of a node $n$ in \astar, lookahead search performs a depth-first search with cost bound $f(n)+k$ rooted at $n$. As a special case, under the cost bound $k=0$ ($AL^*_0$ in their notation), depth-first lookahead expands only the children with the same $f$-value.
+% There are both commonality and difference in our approach and $AL^*$:
+% In terms of commonality, 
+$AL^*$, or $AL^*_0$ in particular, is similar to $[f,\lifo]$ in that the lookahead is a depth-first search.
+However, there are both conceptual and algorithmic differences: 
+First of all, $AL^*_0$ does not specify the intermediate tie-breaking (such as $h$-based tie-breaking) for its main \astar, and depth-first lookahead does not perform best-first expansion, so the tie-breaking is irrelevant. Thus, the problems and the solutions addressed in these approaches are different.
+Second, $AL^*$ propagates the maximum and the minimum $f$ values found in the lookahead search, which allows for more pruning.
+% wrong, see AAAI10 paper that ``recitify this''
+% Finally, when $k>0$ the search becomes inadmissible because it alters the best-first expansion order.
+
+Another relevant line of work, in similar spirit to Zerocost domains, is the Preference Track in the deterministic
+part of IPC4 \cite{gerevini2009automatically}. One difference between our Zerocost domains and these domains is
+that the latter allows a more complex semantics such as multiplication.
+% 
+More recently, \shortciteauthor{wray2015multi} \citeyear{wray2015multi} proposed a model called \emph{conditional lexicographic preferences with slack} in the context of planning under uncertainty. 
+% 
+Lexicographic preferences allow the problem to have multiple preference criteria evaluated individually. The
+solution quality is determined by the first preference, breaking ties by the second preference and so on.
+% 
+Slack refers to a constant amount of error from the optimal value. With slack, one can model a situation where the
+goal is to optimize the first preference, but the difference up to some amount is ignored and ties are broken according to 
+the second preference.
+% 
+An example of a planning problem with such lexicographic preferences with slack would be a transportation problem where 
+the first optimization objective is the amount of fuel usage, allowing a slack up to 5 liters, and 
+the second optimization target is the makespan of the plan.
+In this case, a plan with 100 liters of fuel usage and a plan with 105 liters of fuel usage are considered equally preferable in the first criterion, and the better plan is the one with a shorter makespan.
+% 
+Since slack allows multiple values (e.g. 100 and 105) to have the same preference, it should introduce larger plateaus.
+Applying our techniques to problems with slack is an avenue of future work.
+
+
+\section{Conclusions and Future Work}
+
+In this paper, we investigated tie-breaking strategies for cost-optimal search using \astar.  
+\begin{comment} % the goals are unimportant
+We sought to (1) shed some light on the importance of tie-breaking in \astar,  %one of the most popular best-first search algorithms, 
+(2) improve \astar without modifying its main heuristic function at all, and (3) to
+improve \astar by introducing inadmissible techniques. We reached all of these goals successfully: We sought
+various possible enhancements and achieved significant performance improvements solely by the tie-breaking
+techniques. In detail, the contributions in this paper are the following:
+\end{comment}
+Our contributions are as follows:
+% \begin{enumerate} % It looks bad when an entire section is just an enumerated list, 
+ First, we showed that tie-breaking has a significant role in the cost-optimal
+       search using \astar. We empirically showed that most  IPC
+       benchmark instances have large plateaus with regard to $f$, and most of the
+       search effort is spent in the final plateau with $f=f^*$.
+
+ We then showed that  the commonly used tie-breaking policy based on $h$ value fails to
+       provide guidance in the plateau when problem instances have 0-cost
+       actions and have large plateaus with regard to $h$.
+       We empirically showed that most of the search effort can be spent in
+       the final plateau with $f=f^*, h=0$ in some domains, and noted that in such
+       a plateau, the search is controlled solely by the
+       default tie-breaking \fifo, \lifo or \ro.
+
+ We proposed  a new set of benchmark instances for cost-optimal planning, called Zerocost
+ domains, which contain many 0-cost actions.
+         We showed that Zerocost versions of IPC benchmark domains tend to have larger final plateaus with $f=f^*, h=0$ and pose a new challenge to traditional search algorithms.
+  % removed ``strictly harder than'' because ``strictly harder'' has a formal connotation, which is not our contribution.
+  % --- yes, and it is also an unproven claim: W[2]\not= Para-NP-hard is not proven yet
+       % I do not cite the meysam's paper here because I want to make my contribution clear.
+
+ As one approach to improving search performance in Zerocost domains, we proposed a depth metric
+       which measures the distance from the entrance to the
+       plateau. Using this metric, we described the pathological
+       behaviors of \fifo, \lifo and \ro, proposed a new diversification
+       strategy, theoretically and empirically showed that it avoids the
+       pathological behavior and achieves a better performance.
+
+We then introduced a new interpretation of cost-optimal \astar search as a series of satisficing
+       searches among $f$-cost plateaus of an increasing order of $f$. 
+%This opens  many opportunities for unifying work on satisficing search and cost-optimal search, as 
+%many techniques which have been developed for 
+%       satisficing search can be directly applied to plateau search in   cost-optimal search.
+This perspective led to another approach for effective tie-breaking in Zerocost domains, the use of
+       inadmissible distance-to-go estimates as part of a multi-heuristics tie-breaking strategy.
+       Combination of depth diversification and distance-to-go estimates results in the best overall performance. Although there is an additional cost to compute
+       multiple heuristic values, the overhead can be eliminated by a simple
+       case-based configuration which only uses multiple heuristics when 0-cost actions are present in the problem instance.
+
+Our reformulation of \astar as a sequence of satisficing searches  points to  an interesting direction for future work.
+Although we evaluated only one relatively simple, satisficing configuration ($\ffo$) in
+the experiments, many techniques which have previously been developed for satisficing planning can be applied to enhance tie-breaking (plateau-search) in cost-optimal search, including
+lazy evaluation \cite{richter2010lama}, alternating/Pareto open
+list \cite{RogerH10}, helpful actions (preferred operators) \cite{Hoffmann01},
+random walk local search \cite{nakhost2009monte}, macro operators
+\cite{Botea2005,ChrpaVM15}, factored planning
+\cite{amir2003factored,brafman2006factored,Asai2015} and
+exploration-based search enhancements
+\cite{valenzano2014comparison,xie14type,Valenzano2016}.
+
+% Another direction for future work is implementing tie-breaking strategies for IDA* and similar linear-space
+% strategies like RBFS.
+% For example, how do we implement or simulate depth-based tie-breaking with a linear space usage?
+% \todo*{In fact, exploring the application of ``IDA* = series of satisficing seraches'' seems like an interesting
+% direction for future work, e.g., how to simulate depth-based tie-breaking (node ordering) in IDA*? IDA* is useful
+% for domains where memory limitations are the bottleneck, so keeping the depth buckets in memory may not be
+% possible. More broadly, linear space, best-first search including RBFS}
