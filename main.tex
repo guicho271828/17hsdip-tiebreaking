@@ -777,14 +777,9 @@ Applying our techniques to problems with slack is an avenue of future work.
 
 \section{Conclusions and Future Work}
 
+
+\begin{comment} % not this paper 
 In this paper, we investigated tie-breaking strategies for cost-optimal search using \astar.  
-\begin{comment} % the goals are unimportant
-We sought to (1) shed some light on the importance of tie-breaking in \astar,  %one of the most popular best-first search algorithms, 
-(2) improve \astar without modifying its main heuristic function at all, and (3) to
-improve \astar by introducing inadmissible techniques. We reached all of these goals successfully: We sought
-various possible enhancements and achieved significant performance improvements solely by the tie-breaking
-techniques. In detail, the contributions in this paper are the following:
-\end{comment}
 Our contributions are as follows:
 % \begin{enumerate} % It looks bad when an entire section is just an enumerated list, 
  First, we showed that tie-breaking has a significant role in the cost-optimal
@@ -813,13 +808,14 @@ Our contributions are as follows:
        behaviors of \fifo, \lifo and \ro, proposed a new diversification
        strategy, theoretically and empirically showed that it avoids the
        pathological behavior and achieves a better performance.
+\end{comment} 
 
-We then introduced a new interpretation of cost-optimal \astar search as a series of satisficing
+We introduced a new interpretation of cost-optimal \astar search as a series of satisficing
        searches among $f$-cost plateaus of an increasing order of $f$. 
 %This opens  many opportunities for unifying work on satisficing search and cost-optimal search, as 
 %many techniques which have been developed for 
 %       satisficing search can be directly applied to plateau search in   cost-optimal search.
-This perspective led to another approach for effective tie-breaking in Zerocost domains, the use of
+This perspective led to a novel approach for effective tie-breaking in Zerocost domains, the use of
        inadmissible distance-to-go estimates as part of a multi-heuristics tie-breaking strategy.
        Combination of depth diversification and distance-to-go estimates results in the best overall performance. Although there is an additional cost to compute
        multiple heuristic values, the overhead can be eliminated by a simple
