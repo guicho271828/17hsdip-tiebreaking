@@ -59,8 +59,8 @@ a thin layer of final plateau $f(n)=f^*$.  This intuitive view
 accurately reflects the search spaces of some real-world problems such as 2D pathfinding on an explicit
 graph.
 % 
-It has also served as a model for algorithms such as Frontier Search \cite{korf1999divide,korf2000divide},
-which tries to reduce the memory requirement by discarding the information associated with states with $f<f^*$, an effective strategy when the number of such states accounts for a large fraction of the memory usage.
+% It has also served as a model for algorithms such as Frontier Search \cite{korf1999divide,korf2000divide},
+% which tries to reduce the memory requirement by discarding the information associated with states with $f<f^*$, an effective strategy when the number of such states accounts for a large fraction of the memory usage.
 
 \begin{figure}[htbp]
   \centering
@@ -86,8 +86,8 @@ which tries to reduce the memory requirement by discarding the information assoc
  
 However, for many other classes of combinatorial search problems, e.g., the IPC Planning Competition Benchmarks, 
 the figure on the right is a more accurate depiction -- here, the  search space has a large plateau for $f=f^*$.
-In fact, Iterative Deepening approaches \cite{korf1985depth} assume this type of search space
-where this final frontier is quite large and the overhead of re-evaluating $f<f^*$ is limited.
+% In fact, Iterative Deepening approaches \cite{korf1985depth} assume this type of search space
+% where this final frontier is quite large and the overhead of re-evaluating $f<f^*$ is limited.
 Classical planning problems in the IPC benchmark set are clearly the instances of such combinatorial search problems.
 \todo*{The fact that the last layer of search dominates the search was the motivation for Frontier Search and its numerous variants, so the SoCS community has been well aware of this --- SoCS community considers the opposite. Frontier search would not gain advantage in the planning domains because the number of nodes being forgotten is low compared to the size of the plateau.}
 
