@@ -108,7 +108,7 @@ most or all of the nodes in the last layer have the same $h$-value.
 In this paper, we provide an alternative view to the tie-breaking behavior of A*.
 More specifically, cost-optimal search using \astar 
 can be considered as a series of satisficing searches on each plateau.
-This allows the problem of tie-breaking to be reduced to satisficing search within a plateau (\refsec{sec:discussion}), opening a wide variety of future work.
+This allows the problem of tie-breaking to be reduced to satisficing search within a plateau (\refsec{sec:astar-as-sat}), opening a wide variety of future work.
 
 Based on this insight, we then investigate an
 admissible tie-breaking strategy which uses an inadmissible distance-to-go estimate, a heuristic function which treats every action
@@ -116,7 +116,7 @@ to have the unit costs (\refsec{sec:distance-to-go}), for tie-breaking.
 Although distance-to-go estimates are inadmissible,
 it does compromise the admissibility of \astar as long as it is used only for tie-breaking.
 
-\section{Related Work}
+\section{Preliminaries}
 
 We first define some notation and the terminology used throughout the
 rest of the paper.
@@ -176,7 +176,10 @@ domains \footnote{\relsize{-1}\url{github.com/guicho271828/zerocost-opt}}.
 Random Depth tiebreaking and its deterministic version diversify the
 search within each plateau using the depth metric $d(n)$, a distance
 from the current node $n$ to the nearest ancestor that has the different
-$f$-value and the $h$-value.
+$f$-value and the $h$-value.  Each node in a $h$-plateau is stored into
+a bucket of the corresponding depth $d$, and the expansion happens on a
+node in a bucket that is selected at random, or in a round-robin manner
+(deterministic version). Such a configuration of \astar is denoted as $[f,h,\depth,*]$.
 
 Zerocost domains are the modified version of the standard IPC domains which 
 characterizes the more practical cost-minimization problems
@@ -184,6 +187,8 @@ where the most important actions directly related to resource usage incur the no
 We use this Zerocost domains for evaluation throughout the paper.
 
 \section{\astar as a Series of Satisficing Search}
+
+\label{sec:astar-as-sat}
 
 % We now propose a more general framework which underscores the importance of tie-breaking in \astar.
 % \emph{Cost-optimal search
@@ -200,7 +205,7 @@ We use this Zerocost domains for evaluation throughout the paper.
 
 While \astar requires the first sorting criterion $f$ to use an admissible heuristic in order to find an optimal solution,
 there are no requirements on the second or later sorting criterion.
-This means that the search within the same $f$ plateau can be an arbitrary satisficing search\footnote{This refers to any algorithm which seeks a satisficing solution, as opposed to the ``satisficing'' track setting in IPC which also seeks to minimize the plan cost with anytime algorithms} without any cost minimization requirement. For example,
+This means that the search within the same $f$ plateau can be an arbitrary satisficing search without any cost minimization requirement (as opposed to the ``satisficing'' track setting in IPC which also seeks to minimize the plan cost with anytime algorithms). For example,
 if we ignore the first sorting criterion in the standard admissible strategy
 $[f,h,\fifo]$, we have $[h,\fifo]$, which is exactly
 the same configuration as a Greedy Best First Search (GBFS) using \fifo default tie-breaking. This 
@@ -314,26 +319,26 @@ It is also reminiscent of the behavior of iterative deepening \astar \cite{korf1
 
 The framework of ``\astar as a series of satisficing searches'' suggests that we can directly apply satisficing search techniques to optimal search using \astar, especially for each $f$-cost plateau search.
 % 
-In the following two subsections, as well as in the next section, we show that this framework  (1) provides a better understanding of depth-diversification (\refsec{sec:depth-vs-types}), (2) allows us to prove the completeness of \astar on infinite graph depending on the tie-breaking methods (\refsec{sec:completeness-on-infinite-space}), and (3) allows us to improve the performance of \astar on Zerocost domains (\refsec{sec:distance-to-go}).
+In the following sections, we show that this framework  (1) provides a better understanding of depth-diversification (\refsec{sec:depth-vs-types}) and (2) allows us to improve the performance of \astar on Zerocost domains (\refsec{sec:distance-to-go}).
 
-\subsection{Depth Diversification as Satisficing Search}
+\subsection{Depth Diversification and Satisficing Search}
 \label{sec:depth-vs-types}
 Within this framework, the implementation of depth diversification can be viewed as a variant of the Type-based diversification approach \cite{xie14type},  specifically tailored for Zerocost domains.
 
-\citeauthor{xie14type} proposed \emph{type based buckets}, an implementation of the OPEN list which partitions the nodes into buckets according to some set of key values (\emph{types}). They proposed several types such as $\brackets{1}$, $\brackets{g}$, $\brackets{h}$ or $\brackets{g,h}$. At each type-based expansion, a randomly selected node from a randomly selected single bucket is selected. For example, with type $\brackets{g,h}$, a node with $g=5$ and $h=3$ is put into a bucket  $\brackets{5,3}$. This mechanism diversifies the search so that it tries to expand the nodes with various distances from the initial state and various distances from a goal state.
+\citeauthor{xie14type} proposed \emph{type based buckets}, an implementation of the OPEN list which partitions the nodes into buckets according to some set of key values (\emph{types}). They proposed several types such as $\brackets{1}$, $\brackets{g}$, $\brackets{h}$ or $\brackets{g,h}$. At each type-based expansion, a randomly selected node from a randomly selected single bucket is selected. For example, with type $\brackets{g,h}$, a node with $g=5$ and $h=3$ is put into a bucket  $\brackets{5,3}$. This mechanism diversifies the search so that it removes the cardinality bias in terms of the distance of a node from the initial state or the goal states.
+They then proposed Type-GBFS, which alternates the expansion between a normal GBFS $[h,\fifo]$ and the type-based expansion $[\brackets{g,h},\ro]$.
+% This alternating framework addresses a weakness of GBFS: 
+% GBFS is solely guided by the heuristic function $h$, and heuristic errors in $h$ can easily misguide GBFS to spend all of its time in the wrong part of the search space -- GBFS can become trapped due to heuristic error and cannot recover from the wrong decision until expanding all nodes in that branch.
+% In the worst case, on infinite graphs, GBFS is not complete because it can be misdirected by the heuristic guidance forever \cite{Valenzano2016}.
+% In contrast, in Type-GBFS, the alternation with type-based expansion introduces exploratory behavior of nodes with low $g$ and high $h$, offering the possibility of escaping from heuristic error traps.
+% As a result, Type-GBFS is probabilistically complete on infinite graphs \cite{Valenzano2016}.
 
-They then proposed Type-GBFS, which alternates the expansion between normal GBFS with a $[h,\fifo]$ sorting criteria and type-based expansion. This alternating framework addresses a weakness of GBFS: 
-GBFS is solely guided by the heuristic function $h$, and heuristic errors in $h$ can easily misguide GBFS to spend all of its time in the wrong part of the search space -- GBFS can become trapped due to heuristic error and cannot recover from the wrong decision until expanding all nodes in that branch.
-In the worst case, on infinite graphs, GBFS is not complete because it can be misdirected by the heuristic guidance forever \cite{Valenzano2016}.
-In contrast, in Type-GBFS, the alternation with type-based expansion introduces exploratory behavior of nodes with low $g$ and high $h$, offering the possibility of escaping from heuristic error traps.
-As a result, Type-GBFS is probabilistically complete on infinite graphs \cite{Valenzano2016}.
-
-Type-GBFS was primarily evaluated in the context of satisficing search with no consideration of plan quality, and performance is solely evaluated according to coverage.
-Thus, Xie et al adopted a unit-cost domain model: All action costs are ignored and replaced with unit costs in their experiments in order to boost coverage \cite{xie14type}. This is a commonly used technique for satisficing search which is also used in the first iteration of LAMA2011 \cite{richter2011lama}. 
+% Type-GBFS was primarily evaluated in the context of satisficing search with no consideration of plan quality, and performance is solely evaluated according to coverage.
+% Thus, Xie et al adopted a unit-cost domain model: All action costs are ignored and replaced with unit costs in their experiments in order to boost coverage \cite{xie14type}. This is a commonly used technique for satisficing search which is also used in the first iteration of LAMA2011 \cite{richter2011lama}. 
 
 % (i.e., finding either a goal node or exhausting the plateau)
 
-In our framework of \astar as a sequence of satisficing searches, depth diversification after $h$ tie-breaking ($[f,h,\depth]$) can be viewed as the combination of (1) an implicit transformation of all 0-cost edges within a single $\plateau{f,h}$ to unit-cost edges, and (2) a pure type-based exploration within that plateau (unlike Type-GBFS, which alternates GBFS and type-based buckets).
+In our framework of \astar as a sequence of satisficing searches, depth diversification after $h$ tie-breaking ($[f,h,\depth,*]$) can be viewed as the combination of (1) an implicit transformation of all 0-cost edges within a single $\plateau{f,h}$ to unit-cost edges, and (2) a pure type-based exploration within that plateau (unlike Type-GBFS, which alternates GBFS and type-based buckets).
  
 The notion of \emph{depth} counts the number of 0-cost actions, which does not change the $f$ value and $h$
 value, on the path from the entrance to the current plateau, to the current node.  Thus, 
@@ -346,18 +351,18 @@ depth-diversification treats  the problem of finding an exit from a particular p
 %% $\brackets{g}$, a type bucket of a single key value $g$. Thus, depth
 %% diversification can be said to be using a type bucket of $\depth$ (modulo random/deterministic difference).
 
-Depth diversification for tie-breaking in admissible \astar has a different purpose and context from Type-GBFS for satisficing search,
-and differs as follows.
-First, depth diversification  is focused on finding a satisficing plan \emph{within a single plateau} and on solving \emph{domains with 0-cost actions}.
-% which is strictly harder than those without them. %worst-case complexity results for problem classes don't necessarily apply to specific instances, so using this ``strictly harder'' complexity result as justification is dangerous.
-Therefore, depth diversification is applied after the sorting by $h$.
-%Also, the role is limited to each plateau with the same $f$ and $h$ because nodes are put in the depth buckets only after being sorted by $f$ and $h$, 
-In contrast, type buckets are global --- type buckets have no preceding sorting criteria, and all open nodes are stored in these buckets. Type-GBFS then alternates type buckets and sorting by $h$, not applying them in a cascade manner.
+% Depth diversification for tie-breaking in admissible \astar has a different purpose and context from Type-GBFS for satisficing search,
+% and differs as follows.
+% First, depth diversification  is focused on finding a satisficing plan \emph{within a single plateau} and on solving \emph{domains with 0-cost actions}.
+% % which is strictly harder than those without them. %worst-case complexity results for problem classes don't necessarily apply to specific instances, so using this ``strictly harder'' complexity result as justification is dangerous.
+% Therefore, depth diversification is applied after the sorting by $h$.
+% %Also, the role is limited to each plateau with the same $f$ and $h$ because nodes are put in the depth buckets only after being sorted by $f$ and $h$, 
+% In contrast, type buckets are global --- type buckets have no preceding sorting criteria, and all open nodes are stored in these buckets. Type-GBFS then alternates type buckets and sorting by $h$, not applying them in a cascade manner.
 
-Nevertheless, the close relationship between depth diversification for admissible \astar and Type-GBFS for satisficing search is important. It shows that if we apply our framework of ``\astar as a series of satisficing searches'', we can directly use ideas which have been previously proposed for satisficing search within each $f$-cost plateau search.
+% Nevertheless, the close relationship between depth diversification for admissible \astar and Type-GBFS for satisficing search is important. It shows that if we apply our framework of ``\astar as a series of satisficing searches'', we can directly use ideas which have been previously proposed for satisficing search within each $f$-cost plateau search.
 % In the next section, we present another instance of this general approach.
 
-\section{Tie-Breaking Using Distance-to-Go Estimates}
+\section{Tie-Breaking with Distance-to-Go Estimates}
 
 \label{sec:distance-to-go}
 In the previous section, we proposed a framework which views cost-optimal \astar search as a series of satisficing searches on each $f$-cost plateau, and argued that 
