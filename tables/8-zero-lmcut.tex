@@ -3,29 +3,29 @@
 \hline
 $h=\lmcut$ & \rb{$[f,h,\fifo]$} & \rb{$[f,h,\lifo]$} & \rb{$[f,h,\ro]$} & \rb{$[f,h,\depth,\fifo]$} & \rb{$[f,h,\depth,\lifo]$} & \rb{$[f,h,\depth,\ro]$} & \rb{$[f,\hh,\fifo]$} & \rb{$[f,\hh,\lifo]$} & \rb{$[f,\hh,\ro]$} & \rb{$[f,h,\hh,\fifo]$} & \rb{$[f,h,\hh,\lifo]$} & \rb{$[f,h,\hh,\ro]$} & \rb{$[f,\ffo,\fifo]$} & \rb{$[f,\ffo,\lifo]$} & \rb{$[f,\ffo,\ro]$} & \rb{$[f,\ffo,\depth,\fifo]$} & \rb{$[f,\ffo,\depth,\lifo]$} & \rb{$[f,\ffo,\depth,\ro]$}\\
 \hline
-Zerocost (620) & 256 & 279 & 261.9 $\pm$ 1.4 & 284 & 264 & 288.1 $\pm$ 1.6 & 295 & 303 & 301.0 & 305 & 309 & 305.9 $\pm$ 2.1 & 337 & 340 & 341 $\pm$ 2.2 & 340 & 342 & \textbf{344.3} $\pm$ 1.8\\
+Zerocost (620) & 256 & 279 & 261.9 & 284 & 264 & 288.1 & 295 & 303 & 301.0 & 305 & 309 & 305.9 & 337 & 340 & 341 & 340 & 342 & \textbf{344.3}\\
 \hline
-airport-fuel(20) & \textbf{15} & 13 & 13.8 $\pm$ 0.4 & 14 & 13 & 14 $\pm$ 0.5 & 13 & 12 & 12.7 & 14 & 12 & 12.8 $\pm$ 0.8 & 13 & 11 & 11.7 $\pm$ 0.5 & 13 & 11 & 11.7 $\pm$ 0.5\\
-blocks-stack(20) & \textbf{17} & \textbf{17} & \textbf{17} $\pm$ 0 & \textbf{17} & \textbf{17} & \textbf{17} $\pm$ 0 & 15 & 15 & 15.0 & 15 & 15 & 15 $\pm$ 0 & \textbf{17} & \textbf{17} & \textbf{17} $\pm$ 0 & \textbf{17} & \textbf{17} & \textbf{17} $\pm$ 0\\
-elevators-up(20) & 7 & 13 & 7 $\pm$ 0 & 7 & 9 & 9.1 $\pm$ 0.8 & \textbf{20} & \textbf{20} & 19.9 & \textbf{20} & \textbf{20} & \textbf{20} $\pm$ 0 & \textbf{20} & \textbf{20} & \textbf{20} $\pm$ 0 & \textbf{20} & \textbf{20} & \textbf{20} $\pm$ 0\\
-freecell-move(20) & 4 & \textbf{19} & 4.9 $\pm$ 0.3 & 17 & 10 & 16.4 $\pm$ 0.7 & 12 & 14 & 13.3 & 12 & 14 & 13.2 $\pm$ 0.4 & 17 & 18 & 17.9 $\pm$ 0.8 & 17 & 18 & 18.3 $\pm$ 0.9\\
-miconic-up(30) & 16 & 17 & 16.6 $\pm$ 0.5 & 19 & 18 & 20.3 $\pm$ 0.7 & 14 & 17 & 15.1 & 14 & 17 & 15.1 $\pm$ 0.9 & 15 & \textbf{21} & 17.9 $\pm$ 1.2 & 15 & \textbf{21} & 18 $\pm$ 1.2\\
-mprime-succumb(35) & 15 & 14 & 17.1 $\pm$ 0.8 & 22 & 14 & 20.1 $\pm$ 0.3 & 19 & 16 & 19.1 & 20 & 16 & 20.1 $\pm$ 0.6 & \textbf{30} & 23 & 28.3 $\pm$ 0.9 & \textbf{30} & 27 & 29.3 $\pm$ 0.7\\
-mystery-feast(20) & 7 & 5 & 7.7 $\pm$ 0.5 & 6 & 5 & 7.2 $\pm$ 0.8 & 7 & 6 & 6.9 & 6 & 5 & 5.9 $\pm$ 0.3 & \textbf{8} & \textbf{8} & \textbf{8} $\pm$ 0 & \textbf{8} & \textbf{8} & \textbf{8} $\pm$ 0\\
-parking-movecc(20) & 0 & 0 & 0 $\pm$ 0 & 0 & 0 & 0 $\pm$ 0 & 13 & 14 & 14.3 & 13 & 15 & 14.4 $\pm$ 1.5 & \textbf{20} & \textbf{20} & \textbf{20} $\pm$ 0 & \textbf{20} & \textbf{20} & \textbf{20} $\pm$ 0\\
-pipesnt-pushstart(20) & 8 & 8 & 8.4 $\pm$ 0.5 & 8 & 8 & \textbf{9.8} $\pm$ 0.4 & 7 & 8 & 7.7 & 8 & 8 & 7.8 $\pm$ 0.4 & 9 & 9 & 9 $\pm$ 0 & 9 & 9 & 9 $\pm$ 0\\
-pipesworld-pushend(20) & 3 & 4 & 3.8 $\pm$ 0.4 & 3 & 3 & 4.8 $\pm$ 0.4 & 5 & 6 & 5.1 & 5 & 5 & 5 $\pm$ 0 & 7 & \textbf{8} & 7.1 $\pm$ 0.3 & 7 & 7 & 7.7 $\pm$ 0.5\\
-scanalyzer-analyze(20) & 9 & 9 & 9.1 $\pm$ 0.3 & 9 & 10 & 9.2 $\pm$ 0.4 & 8 & 11 & 10.1 & 16 & \textbf{18} & 15.3 $\pm$ 0.9 & 15 & 15 & 15 $\pm$ 0 & 15 & 15 & 15 $\pm$ 0\\
-sokoban-pushgoal(20) & \textbf{18} & \textbf{18} & \textbf{18} $\pm$ 0 & \textbf{18} & \textbf{18} & \textbf{18} $\pm$ 0 & 16 & 16 & 16.0 & 16 & 16 & 16 $\pm$ 0 & 17 & 17 & 17 $\pm$ 0 & 17 & 17 & 17 $\pm$ 0\\
-tidybot-motion(20) & \textbf{16} & \textbf{16} & \textbf{16} $\pm$ 0 & \textbf{16} & \textbf{16} & \textbf{16} $\pm$ 0 & 14 & 14 & 14.0 & 14 & 14 & 14 $\pm$ 0 & 15 & \textbf{16} & \textbf{16} $\pm$ 0 & \textbf{16} & \textbf{16} & 15.9 $\pm$ 0.3\\
-tpp-fuel(30) & 8 & \textbf{11} & 8 $\pm$ 0 & \textbf{11} & 10 & \textbf{11} $\pm$ 0 & 8 & 10 & 8.7 & 8 & 10 & 8.2 $\pm$ 0.4 & 8 & 10 & 9.1 $\pm$ 0.3 & 10 & 10 & 10 $\pm$ 0\\
-woodworking-cut(20) & 5 & 7 & 7 $\pm$ 0 & 8 & 5 & 8.2 $\pm$ 0.8 & \textbf{20} & \textbf{20} & \textbf{20.0} & \textbf{20} & \textbf{20} & \textbf{20} $\pm$ 0 & 19 & \textbf{20} & \textbf{20} $\pm$ 0 & 19 & \textbf{20} & \textbf{20} $\pm$ 0\\
+airport-fuel(20) & \textbf{15} & 13 & 13.8 & 14 & 13 & 14 & 13 & 12 & 12.7 & 14 & 12 & 12.8 & 13 & 11 & 11.7 & 13 & 11 & 11.7\\
+blocks-stack(20) & \textbf{17} & \textbf{17} & \textbf{17} & \textbf{17} & \textbf{17} & \textbf{17} & 15 & 15 & 15.0 & 15 & 15 & 15 & \textbf{17} & \textbf{17} & \textbf{17} & \textbf{17} & \textbf{17} & \textbf{17}\\
+elevators-up(20) & 7 & 13 & 7 & 7 & 9 & 9.1 & \textbf{20} & \textbf{20} & 19.9 & \textbf{20} & \textbf{20} & \textbf{20} & \textbf{20} & \textbf{20} & \textbf{20} & \textbf{20} & \textbf{20} & \textbf{20}\\
+freecell-move(20) & 4 & \textbf{19} & 4.9 & 17 & 10 & 16.4 & 12 & 14 & 13.3 & 12 & 14 & 13.2 & 17 & 18 & 17.9 & 17 & 18 & 18.3\\
+miconic-up(30) & 16 & 17 & 16.6 & 19 & 18 & 20.3 & 14 & 17 & 15.1 & 14 & 17 & 15.1 & 15 & \textbf{21} & 17.9 & 15 & \textbf{21} & 18\\
+mprime-succumb(35) & 15 & 14 & 17.1 & 22 & 14 & 20.1 & 19 & 16 & 19.1 & 20 & 16 & 20.1 & \textbf{30} & 23 & 28.3 & \textbf{30} & 27 & 29.3\\
+mystery-feast(20) & 7 & 5 & 7.7 & 6 & 5 & 7.2 & 7 & 6 & 6.9 & 6 & 5 & 5.9 & \textbf{8} & \textbf{8} & \textbf{8} & \textbf{8} & \textbf{8} & \textbf{8}\\
+parking-movecc(20) & 0 & 0 & 0 & 0 & 0 & 0 & 13 & 14 & 14.3 & 13 & 15 & 14.4 & \textbf{20} & \textbf{20} & \textbf{20} & \textbf{20} & \textbf{20} & \textbf{20}\\
+pipesnt-pushstart(20) & 8 & 8 & 8.4 & 8 & 8 & \textbf{9.8} & 7 & 8 & 7.7 & 8 & 8 & 7.8 & 9 & 9 & 9 & 9 & 9 & 9\\
+pipesworld-pushend(20) & 3 & 4 & 3.8 & 3 & 3 & 4.8 & 5 & 6 & 5.1 & 5 & 5 & 5 & 7 & \textbf{8} & 7.1 & 7 & 7 & 7.7\\
+scanalyzer-analyze(20) & 9 & 9 & 9.1 & 9 & 10 & 9.2 & 8 & 11 & 10.1 & 16 & \textbf{18} & 15.3 & 15 & 15 & 15 & 15 & 15 & 15\\
+sokoban-pushgoal(20) & \textbf{18} & \textbf{18} & \textbf{18} & \textbf{18} & \textbf{18} & \textbf{18} & 16 & 16 & 16.0 & 16 & 16 & 16 & 17 & 17 & 17 & 17 & 17 & 17\\
+tidybot-motion(20) & \textbf{16} & \textbf{16} & \textbf{16} & \textbf{16} & \textbf{16} & \textbf{16} & 14 & 14 & 14.0 & 14 & 14 & 14 & 15 & \textbf{16} & \textbf{16} & \textbf{16} & \textbf{16} & 15.9\\
+tpp-fuel(30) & 8 & \textbf{11} & 8 & \textbf{11} & 10 & \textbf{11} & 8 & 10 & 8.7 & 8 & 10 & 8.2 & 8 & 10 & 9.1 & 10 & 10 & 10\\
+woodworking-cut(20) & 5 & 7 & 7 & 8 & 5 & 8.2 & \textbf{20} & \textbf{20} & \textbf{20.0} & \textbf{20} & \textbf{20} & \textbf{20} & 19 & \textbf{20} & \textbf{20} & 19 & \textbf{20} & \textbf{20}\\
 \hline
-IPC benchmark (1104) & 558 & 565 & 558.9 $\pm$ 2.1 & 571 & \textbf{575} & 571.4 $\pm$ 1.7 & 534 & 534 & 534 $\pm$ 2.1 & 536 & 535 & 534.7 $\pm$ 1.5 & 564 & 562 & 563.7 $\pm$ 1.4 & 563 & 560 & 561.9 $\pm$ 1.4\\
+IPC benchmark (1104) & 558 & 565 & 558.9 & 571 & \textbf{575} & 571.4 & 534 & 534 & 534 & 536 & 535 & 534.7 & 564 & 562 & 563.7 & 563 & 560 & 561.9\\
 \hline
-airport(50) & \textbf{27} & 26 & 25.7 $\pm$ 0.5 & \textbf{27} & 26 & 25.7 $\pm$ 0.5 & 24 & 25 & 23.9 $\pm$ 0.6 & 24 & 24 & 23.8 $\pm$ 0.4 & 25 & 24 & 24.8 $\pm$ 0.4 & 25 & 24 & 24.6 $\pm$ 0.5\\
-cybersec(19) & 2 & 3 & 3.9 $\pm$ 1.1 & 8 & \textbf{12} & 10 $\pm$ 1 & 5 & 3 & 5.9 $\pm$ 1.2 & 6 & 4 & 5.4 $\pm$ 0.7 & 6 & 6 & 5.9 $\pm$ 0.8 & 6 & 5 & 5.6 $\pm$ 0.7\\
-openstacks-opt11(20) & 11 & \textbf{18} & 11.7 $\pm$ 0.5 & \textbf{18} & \textbf{18} & \textbf{18} $\pm$ 0 & 10 & 10 & 10 $\pm$ 0 & 10 & 10 & 9.9 $\pm$ 0.3 & 17 & 17 & 17 $\pm$ 0 & 17 & 17 & 17 $\pm$ 0\\
+airport(50) & \textbf{27} & 26 & 25.7 & \textbf{27} & 26 & 25.7 & 24 & 25 & 23.9 & 24 & 24 & 23.8 & 25 & 24 & 24.8 & 25 & 24 & 24.6\\
+cybersec(19) & 2 & 3 & 3.9 & 8 & \textbf{12} & 10 & 5 & 3 & 5.9 & 6 & 4 & 5.4 & 6 & 6 & 5.9 & 6 & 5 & 5.6\\
+openstacks-opt11(20) & 11 & \textbf{18} & 11.7 & \textbf{18} & \textbf{18} & \textbf{18} & 10 & 10 & 10 & 10 & 10 & 9.9 & 17 & 17 & 17 & 17 & 17 & 17\\
 \hline
 \end{tabular}
 \end{center}
