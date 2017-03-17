@@ -30,7 +30,6 @@
 This new framework motivates a new class of tie-breaking strategy, 
  a multi-heuristic tie-breaking strategy which embeds inadmissible, distance-to-go variations of various heuristics within an admissible search.
  This is shown to further improve the performance in combination with the depth metric proposed in the previous work.
-{\bf [This paper presents results from Sections 7-8 from a recent journal paper \cite{asai2017tie}. This work  has not been previously presented in a conference or workshop.]}
 \end{abstract}
 
 \section{Introduction}
@@ -115,6 +114,9 @@ admissible tie-breaking strategy which uses an inadmissible distance-to-go estim
 to have the unit costs (\refsec{sec:distance-to-go}), for tie-breaking.
 Although distance-to-go estimates are inadmissible,
 it does compromise the admissibility of \astar as long as it is used only for tie-breaking.
+
+{\bf [This paper presents work  from Sections 7-8 from a recent journal paper \cite{asai2017tie}. This work  has not been previously presented in any conference or workshop.]}
+
 
 \section{Preliminaries}
 
@@ -583,7 +585,7 @@ $[f,h,\depth,\lifo]$ which uses depth and does not impose the cost of
 additional heuristics, and the best result using \mands
 was $[f,h,\lifo]$ which imposes no overhead including the depth.
 
-If we look further into the detail, we observed the following:
+Delving into the detailed results, we observed the following:
 In \pddl{Cybersec}, distance-to-go variants (e.g. $[f^\lmcut,\ffo,\lifo]$:5) improve upon the standard strategy (e.g. $[f^\lmcut,h^\lmcut,\lifo]$:3), but does not improve upon depth (e.g. $[f,h,\depth,\lifo]$: 12). When $h=h^\mands$, all coverages are zero. Overheads by $\ffo$ also slightly degrade the performance in \pddl{Openstacks} (e.g. $[f^\lmcut,h^\lmcut,\lifo]$:18, $[f^\lmcut,\ffo,\lifo]$:17, $[f^\lmcut,h^\lmcut,\depth,\lifo]$: 18; Also, $[f^\mands,h^\mands,\lifo]$:19, $[f^\mands,\ffo,\lifo]$:18, $[f^\mands,h^\mands,\depth,\lifo]$: 19). Thus, in these two domains, although there are some improvements in search efficiency due to the guidance by $\ffo$ or $\hh$, the runtime overhead of computing the  distance-to-go heuristics outweighed the benefit.
  
 In the domains with only positive cost actions (all IPC domains except \pddl{Openstacks} and \pddl{Cybersec}), $\hat{h}$ or $\ffo$
