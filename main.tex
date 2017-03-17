@@ -487,7 +487,7 @@ heuristic ($\hat{h}^{\ff}$).
 % least additional overhead.
 We also added configurations with the depth metric within
 $\plateau{f,\hat{h}^{\text{\ff}}}$.
-Detailed per-domain results are shown in \reftbls{tbl:dtg-lmcut-zero}{tbl:dtg-mands-zero}.
+Detailed per-domain results are shown in \reftbl{tbl:dtg-lmcut-zero}.
 
 % \begin{table}[htbp]
 %  \centering
@@ -512,25 +512,14 @@ Detailed per-domain results are shown in \reftbls{tbl:dtg-lmcut-zero}{tbl:dtg-ma
 
 \begin{table*}[htbp]
  {
- \relsize{-2.5}
+ \relsize{-2}
  \centering
  \input{tables/8-zero-lmcut}
- \caption{
- Coverage results with \lmcut for computing $f$ and inadmissible distance-to-go heuristics for tie-breaking, on 620 Zerocost instances and 1104 IPC instances. We highlight the best results when the difference between the maximum and the minimum coverage exceeds 2.
- }
- \label{tbl:dtg-lmcut-zero}
- }
-\end{table*}
-
-\begin{table*}[htbp]
- {
- \relsize{-2.5}
- \centering
  \input{tables/8-zero-mands}
  \caption{
- Coverage results with \mands for computing $f$ and inadmissible distance-to-go heuristics for tie-breaking, on 620 Zerocost instances and 1104 IPC instances. We highlight the best results when the difference between the maximum and the minimum coverage exceeds 2.
+ Coverage results with \lmcut (top) and \mands (bottom) for computing $f$, and various tie-breaking strategies, on 620 Zerocost instances and 1104 IPC instances. We only show the domains when the difference between the maximum and the minimum coverage exceeds 2, and highlight the best results.
  }
- \label{tbl:dtg-mands-zero}
+ \label{tbl:dtg-lmcut-zero}
  }
 \end{table*}
 
