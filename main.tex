@@ -409,13 +409,13 @@ This notation is derived from the fact that the focal list ``blur''s $f$ up to $
 For example, when $w=2, f_{\mit{min}}=5$ and
 $f(n)=5,9,11$, then $\lceil \frac{f}{w\cdot f_{\mit{min}}} \rceil=1,1,2$ respectively. 
 
-Continuing this line of work, \citeauthor{thayer2009using} \citeyear{thayer2009using,thayer2011bounded}
+Continuing this line of work, \citeauthor{thayer2009using} (\citeyear{thayer2009using,thayer2011bounded})
 evaluated various distance-to-go configurations of Weighted
 \astar, Dynamically Weighted \astar \cite{pohl1973avoidance} and $A^*_\epsilon$, where
 some configurations use distance-to-go as part of
 tie-breaking. This work focused on bounded-suboptimal search rather than cost-optimal search.
 % 
-\citeauthor{cushing2010cost} \citeyear{cushing2010cost} pointed out the danger of relying  % neutral tone
+\citeauthor{cushing2010cost} (\citeyear{cushing2010cost}) pointed out the danger of relying  % neutral tone
 on cost estimates in a satisficing search by investigating ``$\varepsilon$-cost traps'' and other pitfalls caused by
 cost estimators for search guidance. % Again, this work targets satisficing search. %''satisficing search'' appears in previous sentence.
 % 
@@ -424,8 +424,8 @@ the FD/LAMA2011 satisficing planner incorporates distance-to-go estimates in its
 framework \cite{richter2011lama}. The first iteration of LAMA uses distance-to-go estimates combined with various satisficing
 search enhancements.
 
-\citeauthor{benton2010g} \citeyear{benton2010g} proposed an inadmissible technique for temporal planning where short actions are
-hidden behind long actions and do not increase makespan . Such actions cause  ``g-value
+\citeauthor{benton2010g} (\citeyear{benton2010g}) proposed an inadmissible technique for temporal planning where short actions are
+hidden behind long actions and do not increase makespan. Such actions cause  ``g-value
 plateaus'', which are similar to the large plateaus caused by 0-cost actions in sequential planning.  They implemented an inadmissible
 heuristic function combined with distance-to-go estimates as an extension of Temporal Fast Downward 
 \cite{eyerich2009using}.  % As stated, their method is not applicable to the cost-optimal search.%true, but they might claim that adapting their technique to admissible search is ``trivial'', so let's just leave this out.
@@ -475,11 +475,11 @@ As we shall see below, a sorting strategy which performs tie-breaking using both
 
 We tested various admissible sorting strategies on IPC domains and Zerocost domains.
 % on Zerocost domains  where tie-breaking strategies have the large impact.
-The configurations are listed in \reftbl{list:distance-configs}. 
+% The configurations are listed in \reftbl{list:distance-configs}. 
 In all configurations, the first sorting criterion is the $f=g+h$ value
 where $h$ is an admissible heuristic (either \lmcut or \mands) using the actual action-cost based  cost calculation.
 As the second (and third) criteria,
-we used $\hat{h}$, the distance-to-go version tested  of the original heuristic function $h$, as well as a distance-to-go variation of FF
+we used $\hat{h}$, the distance-to-go version of the original heuristic function $h$, as well as a distance-to-go variation of FF
 heuristic ($\hat{h}^{\ff}$).
 % , and a distance-to-go variation of
 % GoalCount heuristic ($\hat{h}^{\text{GoalCount}}$) which is added to
@@ -490,26 +490,25 @@ $\plateau{f,\hat{h}^{\text{\ff}}}$.
 A summary of the results is shown in \reftbl{tbl:dtg-summary}.
 Detailed per-domain results are shown in \reftbls{tbl:dtg-lmcut-zero}{tbl:dtg-mands-ipc}.
 
-\begin{table}[htbp]
- \centering
- \[
- \begin{array}{lcllcllcl}
-  (1)\, [h+g, & h,                      &*] & % \\\relax
-  (2)\, [h+g, & h,     \quad   \hat{h}, &*] & % \\\relax
-  (3)\, [h+g, & \hat{h},                &*]     \\\relax
-  (4)\, [h+g, & \hat{h}^{\ff},          &*] & % \\\relax
-  % not include it unless the reviewer complained. 
-  % (5)\, [h+g, & \hat{h}^{\text{GoalCount}},  &*]     \\\relax
-  (5)\, [h+g,   & h, \depth,                   &*] & % \\\relax
-  (6)\, [h+g,   & \hat{h}^{\text{FF}}, \depth, &*]     \\\relax
- \end{array}
- \]
- \vspace{-3em}
- \caption{Configurations compared in this section. $h$ is either \lmcut or \mands.}
- \label{list:distance-configs}
-\end{table}
+% \begin{table}[htbp]
+%  \centering
+%  \[
+%  \begin{array}{lcllcllcl}
+%   (1)\, [h+g, & h,                      &*] & % \\\relax
+%   (2)\, [h+g, & h,     \quad   \hat{h}, &*] & % \\\relax
+%   (3)\, [h+g, & \hat{h},                &*]     \\\relax
+%   (4)\, [h+g, & \hat{h}^{\ff},          &*] & % \\\relax
+%   % not include it unless the reviewer complained. 
+%   % (5)\, [h+g, & \hat{h}^{\text{GoalCount}},  &*]     \\\relax
+%   (5)\, [h+g,   & h, \depth,                   &*] & % \\\relax
+%   (6)\, [h+g,   & \hat{h}^{\text{FF}}, \depth, &*]     \\\relax
+%  \end{array}
+%  \]
+%  \caption{Configurations compared in this section. $h$ is either \lmcut or \mands.}
+%  \label{list:distance-configs}
+% \end{table}
 
-\begin{table}[htbp]
+\begin{table*}[htbp]
  \centering
  \input{tables/8-1-summary}
  \caption{
@@ -518,7 +517,7 @@ Detailed per-domain results are shown in \reftbls{tbl:dtg-lmcut-zero}{tbl:dtg-ma
  For comparison, we also include the results of configurations evaluated in the previous sections.
  }
  \label{tbl:dtg-summary}
-\end{table}
+\end{table*}
 
 \subsubsection{Evaluation on Zerocost Domains}
 
@@ -585,34 +584,33 @@ In \pddl{Cybersec}, distance-to-go variants (e.g. $[f^\lmcut,\ffo,\lifo]$:5) imp
 In the domains with only positive cost actions (all IPC domains except \pddl{Openstacks} and \pddl{Cybersec}), $\hat{h}$ or $\ffo$
 only harm the overall performance due to the overhead.
 When the primary heuristics is \lmcut, we do not observe a significant difference between single-heuristics strategies except for the fractional difference in the configurations using \ro.
-When the primary heuristic is  \mands, $[f^\mands,h^\mands,\lifo]$ performs slightly better than  other default tie-breaking strategies; It also outperforms the depth-based variants as we already discussed in \refsec{sec:depth-based-evaluation}.
-%  (\reftbl{tbl:dtg-lmcut-ipc} and \reftbl{tbl:dtg-mands-ipc}).
+When the primary heuristic is  \mands, $[f^\mands,h^\mands,\lifo]$ performs slightly better than  other default tie-breaking strategies; It also outperforms the depth-based variants.
 
-\subsubsection{Summary of the Evaluation}
-% \pagebreak[3]
-
-\reftbl{tbl:summary} summarizes the overall conclusions of our performance evaluations. We conclude that although the performance gain by depth diversification and distance-to-go heuristics depend on the domain characteristics, they provide a promising overall performance enhancement.
-
-\begin{table}[htb]
-\centering
-\begin{tabular}{|p{5em}|p{8em}||p{10em}|p{10em}|}
-\hline
- Primary Heuristics & Zerocost domains
-                    & Zerocost IPC domains (\pddl{Cybersec}, \pddl{Openstacks})
-                    & Positive-cost IPC domains \\
-\hline
-\lmcut & $[f,\ffo,\depth,\ro]$
-       & $[f,h,\depth,\lifo]$
-       & $[f,h, *]$ or $[f,h, \depth, *]$ (any \textit{default} tie-breaking) \\[0.1em]
-\hline
-\mands & $[f,\ffo,\ro]$ or $[f,\ffo,\depth,\ro]$, but the latter has a smaller variance. 
-       & $[f,h,\lifo]$ or $[f,h,\depth,*]$ (any \textit{default} tie-breaking)
-       & $[f,h,\lifo]$ \\
-\hline
-\end{tabular}
-\caption{Summary of the performance evaluation: Best tie-breaking strategy for each group of domains and each primary heuristic function.}
-\label{tbl:summary}
-\end{table}
+% \subsubsection{Summary of the Evaluation}
+% % \pagebreak[3]
+% 
+% \reftbl{tbl:summary} summarizes the overall conclusions of our performance evaluations. We conclude that although the performance gain by depth diversification and distance-to-go heuristics depend on the domain characteristics, they provide a promising overall performance enhancement.
+% 
+% \begin{table}[htb]
+% \centering
+% \begin{tabular}{|p{5em}|p{8em}||p{10em}|p{10em}|}
+% \hline
+%  Primary Heuristics & Zerocost domains
+%                     & Zerocost IPC domains (\pddl{Cybersec}, \pddl{Openstacks})
+%                     & Positive-cost IPC domains \\
+% \hline
+% \lmcut & $[f,\ffo,\depth,\ro]$
+%        & $[f,h,\depth,\lifo]$
+%        & $[f,h, *]$ or $[f,h, \depth, *]$ (any \textit{default} tie-breaking) \\[0.1em]
+% \hline
+% \mands & $[f,\ffo,\ro]$ or $[f,\ffo,\depth,\ro]$, but the latter has a smaller variance. 
+%        & $[f,h,\lifo]$ or $[f,h,\depth,*]$ (any \textit{default} tie-breaking)
+%        & $[f,h,\lifo]$ \\
+% \hline
+% \end{tabular}
+% \caption{Summary of the performance evaluation: Best tie-breaking strategy for each group of domains and each primary heuristic function.}
+% \label{tbl:summary}
+% \end{table}
 
 \subsection{Simple Dynamic Configuration for Overall Performance}
 \label{sec:dynamic-configuration}
@@ -647,14 +645,14 @@ When the configuration rule is applied to standard IPC instances, the domains wi
 % method which 
 
 
-Overall, these results also strengthen our claim that one should not necessarily rely upon $h$-based
-tie-breaking in some
-domains, as already discussed in \refsec{sec:noh}. In Zerocost domains,
-using a distance-to-go version of an inadmissible heuristic function for
-tie-breaking is more effective. Also, combining the depth metric with
-such an inadmissible heuristics is also effective.
+% Overall, these results also strengthen our claim that one should not necessarily rely upon $h$-based
+% tie-breaking in some
+% domains, as already discussed in \refsec{sec:noh}. In Zerocost domains,
+% using a distance-to-go version of an inadmissible heuristic function for
+% tie-breaking is more effective. Also, combining the depth metric with
+% such an inadmissible heuristics is also effective.
 
-We only tested this relatively simple dynamic configuration that switches between two strategies based on the presence of 0-cost operators. However, as noted in \refsec{sec:depth-based-evaluation}, domain-specific solvers (as opposed to domain-independent solvers, which are the main focus of this paper) can benefit from fine-tuning the tiebreaking strategy so that it is most suited to the target domain.
+We only tested this relatively simple dynamic configuration that switches between two strategies based on the presence of 0-cost operators. However, domain-specific solvers (as opposed to domain-independent solvers, which are the main focus of this paper) can benefit from fine-tuning the tiebreaking strategy so that it is most suited to the target domain.
 
 \section{Related Work}
 
@@ -667,12 +665,12 @@ $[g,h]$ pair and distributes the effort.\footnote{The relationship between Type-
 from the Enhanced Hill Climbing phase of the FF planner
 \cite{Hoffmann01}. % (note that use of macros makes the search inadmissible in general). % adding macros to optimal planners doesn't make search inadmissible as long as the original edges in the search graph remain.
 \citeauthor{Hoffmann05}  gives a detailed analysis of the
-structure of the search spaces of satisficing planning \citeyear{Hoffmann05,Hoffmann11}.
+structure of the search spaces of satisficing planning (\citeyear{Hoffmann05,Hoffmann11}).
 
 % % duplicated, and not particularly investigating plateau %restoring in response to R3.2
- \citeauthor{benton2010g} \citeyear{benton2010g} proposes inadmissible technique for temporal planning
+ \citeauthor{benton2010g} (\citeyear{benton2010g}) proposes inadmissible technique for temporal planning
  where short actions are hidden behind long actions and do not increase makespan.
- \citeauthor{wilt2011cost} \citeyear{wilt2011cost} also analyzes inadmissible distance-to-go estimates.
+ \citeauthor{wilt2011cost} (\citeyear{wilt2011cost}) also analyzes inadmissible distance-to-go estimates.
 % 
 This differs from our work on cost-optimal search because 
 admissible and inadmissible search differ significantly in how non-final plateaus (plateaus with $f < f^*$) are treated:
@@ -684,7 +682,7 @@ Some real-time search algorithms like $ARA^*$ \cite{likhachev2008anytime} are ab
 \end{comment}
 
 In their work on combining multiple inadmissible heuristics in a planner,
-\citeauthor{RogerH10} \citeyear{RogerH10} considered a tie-breaking approach which works as follows:
+\citeauthor{RogerH10} (\citeyear{RogerH10}) considered a tie-breaking approach which works as follows:
 When combining two heuristics $h_1$ and $h_2$, $h_1$ is used as the primary criterion,
 and $h_2$ is used to break ties among nodes with the same $h_1$ --- $[h_1,h_2,\fifo]$.
 This did not perform well in their work on satisficing planning compared to the approaches based on alternation queues and Pareto-optimal queue selection.
@@ -761,7 +759,7 @@ Another relevant line of work, in similar spirit to Zerocost domains, is the Pre
 part of IPC4 \cite{gerevini2009automatically}. One difference between our Zerocost domains and these domains is
 that the latter allows a more complex semantics such as multiplication.
 % 
-More recently, \citeauthor{wray2015multi} \citeyear{wray2015multi} proposed a model called \emph{conditional lexicographic preferences with slack} in the context of planning under uncertainty. 
+More recently, \citeauthor{wray2015multi} (\citeyear{wray2015multi}) proposed a model called \emph{conditional lexicographic preferences with slack} in the context of planning under uncertainty. 
 % 
 Lexicographic preferences allow the problem to have multiple preference criteria evaluated individually. The
 solution quality is determined by the first preference, breaking ties by the second preference and so on.
